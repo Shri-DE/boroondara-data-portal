@@ -1,11 +1,1 @@
-[
-  {
-    "upn": "admin@boroondara.vic.gov.au",
-    "role": "admin",
-    "isActive": true,
-    "allowedAgents": [],
-    "allowedDatasets": [],
-    "createdAt": "2026-01-31T00:00:00.000Z",
-    "updatedAt": "2026-02-13T00:00:00.000Z"
-  }
-]
+[]

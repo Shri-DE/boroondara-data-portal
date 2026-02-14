@@ -61,7 +61,7 @@ const usersFile = path.join(dataDir, "users.json");
 
 // ✅ Safety net: PORTAL_ADMINS env var ensures these users always have admin access
 // even if they are accidentally removed from users.json
-const PORTAL_ADMINS = (process.env.PORTAL_ADMINS || "admin@boroondara.vic.gov.au")
+const PORTAL_ADMINS = (process.env.PORTAL_ADMINS || "")
   .split(",")
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean);

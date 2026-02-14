@@ -45,7 +45,7 @@ app.use("/api/onboard", onboardRoutes);
 app.use("/api/spatial", geospatialRoutes);
 
 // ── GET /api/me — Current user profile with access flags ──
-const PORTAL_ADMINS_ME = (process.env.PORTAL_ADMINS || "admin@boroondara.vic.gov.au")
+const PORTAL_ADMINS_ME = (process.env.PORTAL_ADMINS || "")
   .split(",")
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean);

@@ -4,7 +4,7 @@ const path = require("path");
 const fs = require("fs").promises;
 
 // PORTAL_ADMINS env var: these users are always treated as admin
-const PORTAL_ADMINS = (process.env.PORTAL_ADMINS || "admin@boroondara.vic.gov.au")
+const PORTAL_ADMINS = (process.env.PORTAL_ADMINS || "")
   .split(",")
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean);

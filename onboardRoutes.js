@@ -11,10 +11,13 @@ const dataDir = path.join(__dirname, "data");
 const usersFile = path.join(dataDir, "users.json");
 const catalogueFile = path.join(dataDir, "datasetCatalogue.json");
 
-const PORTAL_ADMINS = (process.env.PORTAL_ADMINS || "admin@boroondara.vic.gov.au")
+const PORTAL_ADMINS = (process.env.PORTAL_ADMINS || "")
   .split(",")
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean);
+
+// Allowed email domain for onboarding (set via ALLOWED_EMAIL_DOMAIN env var)
+const ALLOWED_EMAIL_DOMAIN = (process.env.ALLOWED_EMAIL_DOMAIN || "").toLowerCase();
 
 // Agent metadata for onboarding display (public, minimal)
 const AGENTS = [
@@ -80,8 +83,8 @@ router.post("/", async (req, res) => {
     if (!trimmedEmail || !trimmedEmail.includes("@")) {
       return res.status(400).json({ error: "Invalid email address" });
     }
-    if (!trimmedEmail.endsWith("@boroondara.vic.gov.au")) {
-      return res.status(400).json({ error: "Only @boroondara.vic.gov.au email addresses are accepted" });
+    if (ALLOWED_EMAIL_DOMAIN && !trimmedEmail.endsWith(`@${ALLOWED_EMAIL_DOMAIN}`)) {
+      return res.status(400).json({ error: `Only @${ALLOWED_EMAIL_DOMAIN} email addresses are accepted` });
     }
 
     // 2. Load existing users
@@ -148,11 +151,11 @@ router.post("/", async (req, res) => {
 // Admin notification email
 // ──────────────────────────────────────────
 async function sendAdminNotification(userEmail, access, users) {
-  // For demo: always send to support@boroondara.vic.gov.au
-  const DEMO_RECIPIENT = "support@boroondara.vic.gov.au";
+  // Send notifications to the configured admin contact
+  const ADMIN_CONTACT = process.env.ADMIN_CONTACT_EMAIL || "";
 
   // Also collect admin emails from PORTAL_ADMINS + active admins in users.json
-  let adminEmails = [DEMO_RECIPIENT, ...PORTAL_ADMINS];
+  let adminEmails = [ADMIN_CONTACT, ...PORTAL_ADMINS].filter(Boolean);
   try {
     const fileAdmins = users
       .filter((u) => u.role === "admin" && u.isActive && u.upn)
@@ -213,7 +216,7 @@ async function sendAdminNotification(userEmail, access, users) {
         </table>
         <p style="margin: 20px 0 0; color: #505050; font-size: 13px; line-height: 1.5;">
           The user has been created as <strong>inactive</strong>. Please review and approve their access in the
-          <a href="https://boroondara-data-portal.azurewebsites.net/admin" style="color: #00695C; text-decoration: none; font-weight: 600;">Admin Panel</a>.
+          <a href="${process.env.PORTAL_BASE_URL || ''}/admin" style="color: #00695C; text-decoration: none; font-weight: 600;">Admin Panel</a>.
         </p>
       </div>
     </div>
@@ -227,7 +230,7 @@ async function sendAdminNotification(userEmail, access, users) {
     `Dashboard: ${access.requestDashboard ? "Yes" : "No"}`,
     `Reports: ${access.requestReports ? "Yes" : "No"}`,
     "",
-    "Please review in the Admin Panel: https://boroondara-data-portal.azurewebsites.net/admin",
+    `Please review in the Admin Panel: ${process.env.PORTAL_BASE_URL || ''}/admin`,
   ].join("\n");
 
   await sendEmail({ to: adminEmails, subject, html, text });

@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const FROM_ADDRESS = process.env.SMTP_FROM || process.env.SMTP_USER || "noreply@boroondara.vic.gov.au";
+const FROM_ADDRESS = process.env.SMTP_FROM || process.env.SMTP_USER || "noreply@example.com";
 
 /**
  * Send an email.

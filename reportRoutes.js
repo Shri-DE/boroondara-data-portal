@@ -30,7 +30,7 @@ async function loadCatalogue() {
 // Load users (for permission checks)
 // ──────────────────────────────────────────
 const usersFile = path.join(__dirname, "data", "users.json");
-const PORTAL_ADMINS = (process.env.PORTAL_ADMINS || "admin@boroondara.vic.gov.au")
+const PORTAL_ADMINS = (process.env.PORTAL_ADMINS || "")
   .split(",")
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean);

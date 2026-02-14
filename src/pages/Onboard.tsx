@@ -256,14 +256,16 @@ export default function Onboard() {
   }, [step]);
 
   /* ── Validation helpers ── */
+  const allowedDomain = (process.env.REACT_APP_ALLOWED_EMAIL_DOMAIN || "").toLowerCase();
+
   const validateEmail = (val: string) => {
     const trimmed = val.trim().toLowerCase();
     if (!trimmed || !trimmed.includes("@")) {
       setEmailError("Please enter a valid email address.");
       return false;
     }
-    if (!trimmed.endsWith("@boroondara.vic.gov.au")) {
-      setEmailError("Only @boroondara.vic.gov.au email addresses are accepted.");
+    if (allowedDomain && !trimmed.endsWith(`@${allowedDomain}`)) {
+      setEmailError(`Only @${allowedDomain} email addresses are accepted.`);
       return false;
     }
     setEmailError("");
@@ -386,7 +388,7 @@ export default function Onboard() {
             <div className={s.fieldGroup}>
               <TextField
                 label="Email address"
-                placeholder="yourname@boroondara.vic.gov.au"
+                placeholder={allowedDomain ? `yourname@${allowedDomain}` : "yourname@example.com"}
                 value={email}
                 onChange={(_, val) => {
                   setEmail(val || "");
