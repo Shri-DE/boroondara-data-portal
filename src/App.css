@@ -1,0 +1,360 @@
+.App {
+  height: 100vh;
+}
+
+/* ==============================
+   Custom scrollbar
+============================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.30);
+}
+
+/* ==============================
+   Thinking dots animation
+============================== */
+.thinking-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.25);
+  animation: dotPulse 1.4s ease-in-out infinite;
+}
+
+.thinking-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.thinking-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes dotPulse {
+  0%, 80%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* ==============================
+   Markdown Prose — assistant messages
+============================== */
+
+/* Paragraphs */
+.md-paragraph {
+  margin: 0 0 12px 0;
+  line-height: 1.75;
+  color: #333333;
+}
+
+.md-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* Strong / Bold */
+.md-strong {
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+/* Headings inside messages */
+.md-heading {
+  margin: 18px 0 8px 0;
+  font-weight: 600;
+  color: #1A1A1A;
+  letter-spacing: -0.2px;
+}
+
+h3.md-heading {
+  font-size: 15px;
+}
+
+h4.md-heading {
+  font-size: 14px;
+}
+
+/* ==============================
+   Markdown Tables
+   Uses high-specificity selectors to
+   guarantee borders always show.
+============================== */
+
+/* Wrapper — scrollable, rounded, bordered */
+.md-table-wrap {
+  margin: 16px 0;
+  border-radius: 4px;
+  border: 1px solid #E1E1E1 !important;
+  background: #FFFFFF;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* The table itself */
+.md-table-wrap > table,
+.md-table-wrap > table.md-table,
+.assistant-prose-wrap table {
+  width: 100%;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  font-size: 13px;
+  line-height: 1.55;
+  table-layout: auto;
+}
+
+/* Fallback: tables directly inside prose (not via custom component) */
+.assistant-prose-wrap table {
+  margin: 16px 0;
+  border-radius: 4px;
+  border: 1px solid #E1E1E1 !important;
+  background: #FFFFFF;
+  overflow: hidden;
+}
+
+/* ---- Header row ---- */
+.md-table-wrap thead,
+.assistant-prose-wrap table thead {
+  background: #F5F5F5;
+}
+
+.md-table-wrap th,
+.assistant-prose-wrap table th {
+  padding: 11px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #1A1A1A;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+  border-bottom: 2px solid #D1D1D1 !important;
+  border-right: 1px solid #EDEDED !important;
+}
+
+.md-table-wrap th:last-child,
+.assistant-prose-wrap table th:last-child {
+  border-right: none !important;
+}
+
+/* ---- Body cells ---- */
+.md-table-wrap td,
+.assistant-prose-wrap table td {
+  padding: 10px 16px;
+  text-align: left;
+  color: #333333;
+  border-bottom: 1px solid #EDEDED !important;
+  border-right: 1px solid #EDEDED !important;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.md-table-wrap td:last-child,
+.assistant-prose-wrap table td:last-child {
+  border-right: none !important;
+}
+
+/* Alternating row stripes */
+.md-table-wrap tbody tr:nth-child(even),
+.assistant-prose-wrap table tbody tr:nth-child(even) {
+  background: #FAFAFA;
+}
+
+/* Hover */
+.md-table-wrap tbody tr:hover,
+.assistant-prose-wrap table tbody tr:hover {
+  background: #F0F6FF;
+}
+
+/* Last row — no bottom border (the wrapper has the outer border) */
+.md-table-wrap tbody tr:last-child td,
+.assistant-prose-wrap table tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* ==============================
+   Code blocks
+============================== */
+.md-code-block {
+  margin: 14px 0;
+  border-radius: 4px;
+  background: #F5F5F5;
+  border: 1px solid #E1E1E1;
+  overflow-x: auto;
+}
+
+.md-code-block pre {
+  margin: 0;
+  padding: 14px 18px;
+  overflow-x: auto;
+}
+
+.md-code-block code {
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #1A1A1A;
+  white-space: pre;
+  tab-size: 2;
+}
+
+/* Inline code */
+.md-inline-code {
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  font-size: 12.5px;
+  background: #F0F0F0;
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: #0078D4;
+}
+
+/* ==============================
+   Markdown lists
+============================== */
+.md-paragraph + ul,
+.md-paragraph + ol {
+  margin-top: -4px;
+}
+
+/* style lists inside assistant prose */
+.assistantProse ul,
+.assistantProse ol {
+  padding-left: 20px;
+  margin: 8px 0;
+  color: #333333;
+}
+
+.assistantProse li {
+  margin-bottom: 4px;
+  line-height: 1.7;
+}
+
+/* ==============================
+   Markdown links
+============================== */
+.assistantProse a {
+  color: #0078D4;
+  text-decoration: none;
+}
+
+.assistantProse a:hover {
+  text-decoration: underline;
+}
+
+/* ==============================
+   SQL Citation — expandable source
+============================== */
+.sql-citation-details {
+  margin: 0;
+  border: 1px solid #E1E1E1;
+  border-radius: 4px;
+  background: #FAFAFA;
+  overflow: hidden;
+}
+
+.sql-citation-summary {
+  padding: 9px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #505050;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.sql-citation-summary::-webkit-details-marker {
+  display: none;
+}
+
+.sql-citation-summary::before {
+  content: "▸";
+  font-size: 10px;
+  transition: transform 0.15s;
+}
+
+.sql-citation-details[open] .sql-citation-summary::before {
+  transform: rotate(90deg);
+}
+
+.sql-citation-summary:hover {
+  color: #1A1A1A;
+  background: #F0F0F0;
+}
+
+/* Also keep support for <details> inside markdown prose (if AI generates them) */
+.assistant-prose-wrap details {
+  margin: 12px 0 4px;
+  border: 1px solid #E1E1E1;
+  border-radius: 4px;
+  background: #FAFAFA;
+  overflow: hidden;
+}
+
+.assistant-prose-wrap details summary {
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #505050;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.assistant-prose-wrap details summary::-webkit-details-marker {
+  display: none;
+}
+
+.assistant-prose-wrap details summary::before {
+  content: "▸";
+  font-size: 11px;
+  transition: transform 0.15s;
+}
+
+.assistant-prose-wrap details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.assistant-prose-wrap details summary:hover {
+  color: #1A1A1A;
+  background: #F0F0F0;
+}
+
+.assistant-prose-wrap details[open] summary {
+  border-bottom: 1px solid #EDEDED;
+}
+
+.assistant-prose-wrap details .md-code-block {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+}
+
+/* ==============================
+   Textarea placeholder
+============================== */
+textarea::placeholder {
+  color: #707070;
+}
