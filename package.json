@@ -15,7 +15,7 @@
     "jsonwebtoken": "^9.0.3",
     "leaflet": "^1.9.4",
     "nodemailer": "^8.0.1",
-    "msnodesqlv8": "^4.2.1",
+    "mssql": "^11.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.1",

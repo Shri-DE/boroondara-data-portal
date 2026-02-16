@@ -1,12 +1,12 @@
-// services/fabricService.js — Microsoft Fabric Warehouse connection via ODBC
-const sql = require("msnodesqlv8");
+// services/fabricService.js — Microsoft Fabric Warehouse connection via mssql (pure JS)
+const sql = require("mssql");
 
 let pool = null;
 let schemaCache = null;
 let schemaCacheTime = 0;
 const SCHEMA_CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
-function buildConnectionString() {
+function buildConfig() {
   const server = process.env.FABRIC_SERVER;
   const database = process.env.FABRIC_DATABASE;
   const clientId = process.env.FABRIC_CLIENT_ID;
@@ -19,50 +19,42 @@ function buildConnectionString() {
     );
   }
 
-  return [
-    "Driver={ODBC Driver 18 for SQL Server}",
-    `Server=${server}`,
-    `Database=${database}`,
-    "Authentication=ActiveDirectoryServicePrincipal",
-    `UID=${clientId}@${tenantId}`,
-    `PWD=${clientSecret}`,
-    "Encrypt=yes",
-    "TrustServerCertificate=no",
-  ].join(";");
+  return {
+    server,
+    database,
+    authentication: {
+      type: "azure-active-directory-service-principal-secret",
+      options: {
+        clientId,
+        tenantId,
+        clientSecret,
+      },
+    },
+    pool: {
+      max: 10,
+      min: 2,
+      idleTimeoutMillis: 300000,
+    },
+    options: {
+      encrypt: true,
+      trustServerCertificate: false,
+      port: 1433,
+      requestTimeout: 30000,
+      connectionTimeout: 15000,
+    },
+  };
 }
 
-function createPool() {
-  if (pool) return pool;
+async function initialize() {
+  if (pool) return;
 
-  const connectionString = buildConnectionString();
-
-  pool = new sql.Pool({
-    connectionString,
-    ceiling: 10,
-    floor: 2,
-    heartbeatSecs: 30,
-    inactivityTimeoutSecs: 300,
-  });
+  const config = buildConfig();
+  pool = await sql.connect(config);
 
   pool.on("error", (err) => {
     console.error("Unexpected Fabric Warehouse pool error:", err.message);
   });
 
-  return pool;
-}
-
-function openPool(p) {
-  return new Promise((resolve, reject) => {
-    p.open((err) => {
-      if (err) reject(err);
-      else resolve();
-    });
-  });
-}
-
-async function initialize() {
-  const p = createPool();
-  await openPool(p);
   // Verify connection with a simple query
   await executeQuery("SELECT 1 AS test");
   console.log("Fabric Warehouse connection verified");
@@ -108,41 +100,32 @@ async function getSchemaContext() {
 }
 
 async function executeQuery(sqlText) {
-  const p = createPool();
-  return new Promise((resolve, reject) => {
-    p.queryRaw(sqlText, (err, results) => {
-      if (err) return reject(err);
+  if (!pool) {
+    await initialize();
+  }
 
-      const meta = results.meta || [];
-      const rawRows = results.rows || [];
+  const result = await pool.request().query(sqlText);
 
-      // Convert array-of-arrays to array-of-objects (matching pg result shape)
-      const rows = rawRows.map((rawRow) => {
-        const obj = {};
-        for (let i = 0; i < meta.length; i++) {
-          obj[meta[i].name] = rawRow[i];
-        }
-        return obj;
-      });
+  // result.recordset is already an array of objects with named keys
+  const rows = result.recordset || [];
 
-      // Map meta to fields format expected by responseFormatter
-      const fields = meta.map((m) => ({
-        name: m.name,
-        dataTypeID: m.sqlType || m.type || "text",
-      }));
+  // Build fields array from column metadata
+  const columns = (result.recordset && result.recordset.columns) || {};
+  const fields = Object.keys(columns).map((colName) => ({
+    name: colName,
+    dataTypeID: columns[colName].type?.declaration || columns[colName].type?.name || "text",
+  }));
 
-      resolve({
-        rows,
-        fields,
-        rowCount: rows.length,
-      });
-    });
-  });
+  return {
+    rows,
+    fields,
+    rowCount: rows.length,
+  };
 }
 
 async function shutdown() {
   if (pool) {
-    pool.close();
+    await pool.close();
     pool = null;
     console.log("Fabric Warehouse pool closed");
   }
