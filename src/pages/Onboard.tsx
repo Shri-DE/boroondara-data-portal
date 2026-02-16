@@ -25,7 +25,7 @@ const p = {
   text: "#1A1A1A",
   text2: "#505050",
   text3: "#707070",
-  primary: "#0078D4",
+  primary: "#00695C",
 };
 
 /* ── Styles ── */
@@ -423,7 +423,7 @@ export default function Onboard() {
                     height: 38,
                     padding: "0 24px",
                   },
-                  rootHovered: { background: "#004578" },
+                  rootHovered: { background: "#004F45" },
                 }}
               />
             </div>
@@ -546,7 +546,7 @@ export default function Onboard() {
                     height: 38,
                     padding: "0 24px",
                   },
-                  rootHovered: { background: "#004578" },
+                  rootHovered: { background: "#004F45" },
                 }}
               />
             </div>
@@ -587,7 +587,7 @@ export default function Onboard() {
                     height: 40,
                     padding: "0 28px",
                   },
-                  rootHovered: { background: "#004578" },
+                  rootHovered: { background: "#004F45" },
                 }}
               />
             </div>

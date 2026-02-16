@@ -85,7 +85,7 @@ const styles = mergeStyleSets({
     fontWeight: 600,
   },
   avatarAssistant: {
-    background: "#0078D4",
+    background: "#00695C",
     color: "#fff",
   },
   avatarUser: {
@@ -177,9 +177,9 @@ const styles = mergeStyleSets({
     transition: "all 0.15s ease",
     selectors: {
       ":hover": {
-        background: "#E8F0FE",
-        borderColor: "#0078D4",
-        color: "#0078D4",
+        background: "#E0F2F1",
+        borderColor: "#00695C",
+        color: "#00695C",
       },
     },
   },
@@ -204,16 +204,16 @@ const styles = mergeStyleSets({
     transition: "all 0.15s ease",
     selectors: {
       ":hover": {
-        background: "#E8F0FE",
-        borderColor: "#0078D4",
-        color: "#0078D4",
+        background: "#E0F2F1",
+        borderColor: "#00695C",
+        color: "#00695C",
       },
     },
   },
   chartBtnActive: {
-    background: "#E8F0FE",
-    borderColor: "#0078D4",
-    color: "#0078D4",
+    background: "#E0F2F1",
+    borderColor: "#00695C",
+    color: "#00695C",
   },
 
   /* Thinking — step-by-step status */

@@ -126,7 +126,7 @@ const styles = mergeStyleSets({
     color: '#1A1A1A',
     cursor: 'pointer',
     selectors: {
-      ':hover': { color: '#0078D4' },
+      ':hover': { color: '#00695C' },
     },
   },
   tableStat: {
@@ -156,9 +156,9 @@ const styles = mergeStyleSets({
     whiteSpace: 'nowrap' as const,
     selectors: {
       ':hover': {
-        background: '#E8F0FE',
+        background: '#E0F2F1',
         borderColor: 'rgba(0,120,212,0.3)',
-        color: '#0078D4',
+        color: '#00695C',
       },
     },
   },
@@ -179,9 +179,9 @@ const styles = mergeStyleSets({
     transition: 'all 0.15s',
   },
   askBtn: {
-    background: '#E8F0FE',
-    border: '1px solid #0078D4',
-    color: '#0078D4',
+    background: '#E0F2F1',
+    border: '1px solid #00695C',
+    color: '#00695C',
     selectors: {
       ':hover': { background: '#D0E4FC' },
     },
@@ -221,8 +221,8 @@ const styles = mergeStyleSets({
     position: 'relative' as const,
   },
   checkboxChecked: {
-    background: '#0078D4',
-    borderColor: '#0078D4',
+    background: '#00695C',
+    borderColor: '#00695C',
   },
   selectedCount: {
     fontSize: 12,

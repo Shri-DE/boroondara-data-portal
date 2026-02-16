@@ -67,9 +67,9 @@ const styles = mergeStyleSets({
     },
   },
   chartTypeBtnActive: {
-    background: '#E8F0FE',
+    background: '#E0F2F1',
     borderColor: 'rgba(0,120,212,0.4)',
-    color: '#0078D4',
+    color: '#00695C',
   },
   chartWrap: {
     padding: '0 8px 8px 8px',

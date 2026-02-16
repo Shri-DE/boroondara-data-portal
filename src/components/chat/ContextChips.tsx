@@ -23,7 +23,7 @@ interface Props {
   onClearDataset?: () => void;
 }
 
-/* Agent chip color is #0078D4 for all agents */
+/* Agent chip color is #00695C for all agents */
 
 const formatSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
@@ -130,15 +130,15 @@ export default function ContextChips({
         <div
           className={styles.chip}
           style={{
-            borderColor: "#90CAF9",
-            background: "#E8F0FE",
+            borderColor: "#80CBC4",
+            background: "#E0F2F1",
           }}
         >
           <Icon
             iconName="ChatBot"
             style={{
               fontSize: 12,
-              color: "#0078D4",
+              color: "#00695C",
             }}
           />
           <span className={styles.chipLabel}>{selectedAgent.name}</span>
@@ -156,7 +156,7 @@ export default function ContextChips({
         <div key={`${file.name}-${i}`} className={styles.chip}>
           <Icon
             iconName="Attach"
-            style={{ fontSize: 12, color: "#0067B8" }}
+            style={{ fontSize: 12, color: "#00695C" }}
           />
           <span className={styles.chipLabel}>{file.name}</span>
           <span style={{ color: "#707070", fontSize: 10, flexShrink: 0 }}>

@@ -4,8 +4,8 @@ import { boroondaraPalette } from "../../theme/boroondaraTheme";
 import type { Agent } from "../../types/agent.types";
 
 const AGENT_COLORS: Record<string, string> = {
-  finance: "#0078D4",
-  asset: "#0078D4",
+  finance: "#00695C",
+  asset: "#00695C",
 };
 
 const AGENT_ICONS: Record<string, string> = {
@@ -40,7 +40,7 @@ const styles = mergeStyleSets({
     },
   },
   itemSelected: {
-    background: "#E8F0FE",
+    background: "#E0F2F1",
   },
   iconWrap: {
     width: 36,
@@ -70,7 +70,7 @@ const styles = mergeStyleSets({
   },
   check: {
     fontSize: 14,
-    color: "#0078D4",
+    color: "#00695C",
   },
   header: {
     padding: "10px 16px 6px",

@@ -370,7 +370,7 @@ const s = mergeStyleSets({
 const capabilities = [
   {
     icon: "ChatBot",
-    iconBg: "#E8F0FE",
+    iconBg: "#E0F2F1",
     iconBorder: "rgba(0,120,212,0.24)",
     iconColor: "#00695C",
     title: "AI Domain Agents",
@@ -379,7 +379,7 @@ const capabilities = [
   },
   {
     icon: "Database",
-    iconBg: "#E8F0FE",
+    iconBg: "#E0F2F1",
     iconBorder: "rgba(0,103,184,0.24)",
     iconColor: "#00897B",
     title: "Self-Serve Datasets",
@@ -460,7 +460,7 @@ const primaryBtnStyles = {
     fontWeight: 700 as const,
     fontSize: 15,
   },
-  rootHovered: { background: "#004578", color: "#FFFFFF" },
+  rootHovered: { background: "#004F45", color: "#FFFFFF" },
 };
 
 const secondaryBtnStyles = {

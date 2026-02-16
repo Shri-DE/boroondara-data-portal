@@ -220,7 +220,7 @@ h4.md-heading {
   background: #F0F0F0;
   padding: 2px 6px;
   border-radius: 3px;
-  color: #0078D4;
+  color: #00695C;
 }
 
 /* ==============================
@@ -248,7 +248,7 @@ h4.md-heading {
    Markdown links
 ============================== */
 .assistantProse a {
-  color: #0078D4;
+  color: #00695C;
   text-decoration: none;
 }
 

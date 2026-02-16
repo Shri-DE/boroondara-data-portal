@@ -33,7 +33,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onCardClick, onRequestAcce
     ':hover': {
       transform: 'translateY(-2px)',
       boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
-      borderColor: '#0078D4',
+      borderColor: '#00695C',
       background: '#FAFAFA',
     },
   });
@@ -42,7 +42,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onCardClick, onRequestAcce
     width: 40,
     height: 40,
     borderRadius: 4,
-    background: '#E8F0FE',
+    background: '#E0F2F1',
     border: '1px solid rgba(0,120,212,0.2)',
     display: 'flex',
     alignItems: 'center',
@@ -51,7 +51,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onCardClick, onRequestAcce
 
   const iconClass = mergeStyles({
     fontSize: 18,
-    color: '#0078D4',
+    color: '#00695C',
   });
 
   const chipClass = mergeStyles({
@@ -77,7 +77,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onCardClick, onRequestAcce
   const getStatusMeta = (status: string) => {
     const s = (status || '').toLowerCase();
     if (s === 'active') return { label: 'Live', dot: '#107C10', bg: '#E8F5E9' };
-    if (s === 'beta') return { label: 'Demo', dot: '#0078D4', bg: '#E8F0FE' };
+    if (s === 'beta') return { label: 'Demo', dot: '#00695C', bg: '#E0F2F1' };
     if (s === 'maintenance') return { label: 'Maintenance', dot: '#C8C8C8', bg: '#F5F5F5' };
     return { label: status || 'Unknown', dot: '#C8C8C8', bg: '#F5F5F5' };
   };
@@ -191,11 +191,11 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onCardClick, onRequestAcce
               styles={{
                 root: {
                   borderRadius: 4,
-                  background: '#0078D4',
+                  background: '#00695C',
                   border: 'none',
                 },
                 rootHovered: {
-                  background: '#004578',
+                  background: '#004F45',
                 },
               }}
             />

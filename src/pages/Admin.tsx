@@ -187,9 +187,9 @@ const styles = mergeStyleSets({
     borderRadius: 999,
     fontSize: 10,
     fontWeight: 600,
-    border: "1px solid #90CAF9",
-    background: "#E8F0FE",
-    color: "#0078D4",
+    border: "1px solid #80CBC4",
+    background: "#E0F2F1",
+    color: "#00695C",
     marginLeft: 6,
   },
 
@@ -199,7 +199,7 @@ const styles = mergeStyleSets({
     borderRadius: 999,
     fontSize: 11,
     border: "1px solid #EDEDED",
-    background: "#E8F0FE",
+    background: "#E0F2F1",
     color: "#1A1A1A",
     marginRight: 4,
     marginBottom: 4,
@@ -254,7 +254,7 @@ const styles = mergeStyleSets({
     display: "flex",
     alignItems: "center",
     gap: 8,
-    background: "#E8F0FE",
+    background: "#E0F2F1",
     border: "1px solid rgba(0,120,212,0.25)",
     padding: "8px 14px",
     borderRadius: 4,
@@ -274,7 +274,7 @@ const styles = mergeStyleSets({
     display: "flex",
     alignItems: "center",
     gap: 8,
-    background: "#E8F0FE",
+    background: "#E0F2F1",
     border: "1px solid rgba(0,120,212,0.25)",
     padding: "8px 12px",
     borderRadius: 4,
@@ -282,7 +282,7 @@ const styles = mergeStyleSets({
   },
   editBannerText: {
     fontWeight: 600,
-    color: "#0078D4",
+    color: "#00695C",
     fontSize: 13,
     flex: 1,
   },
@@ -1098,7 +1098,7 @@ export default function Admin() {
           styles={{
             root: { marginBottom: 12 },
             link: { color: "#505050", fontSize: 14 },
-            linkIsSelected: { color: "#0078D4", fontWeight: 600 },
+            linkIsSelected: { color: "#00695C", fontWeight: 600 },
           }}
         >
           <PivotItem headerText="Users & Groups" itemKey="users" itemIcon="People" />
@@ -1188,7 +1188,7 @@ export default function Admin() {
                           }
                           style={
                             isEditing
-                              ? { background: "#E8F0FE" }
+                              ? { background: "#E0F2F1" }
                               : undefined
                           }
                         >
@@ -1217,7 +1217,7 @@ export default function Admin() {
               <div className={styles.editBanner}>
                 <Icon
                   iconName="Edit"
-                  styles={{ root: { fontSize: 16, color: "#0078D4" } }}
+                  styles={{ root: { fontSize: 16, color: "#00695C" } }}
                 />
                 <span className={styles.editBannerText}>
                   Editing: {editingUser.displayName || editingUser.upn}
@@ -1261,7 +1261,7 @@ export default function Admin() {
                   pointerEvents: editingUser ? "none" : "auto",
                 },
                 link: { color: "#505050", fontSize: 14 },
-                linkIsSelected: { color: "#0078D4", fontWeight: 600 },
+                linkIsSelected: { color: "#00695C", fontWeight: 600 },
               }}
             >
               <PivotItem headerText="User" itemKey="user" itemIcon="Contact" />
@@ -1287,7 +1287,7 @@ export default function Admin() {
                         : "Contact"
                     }
                     styles={{
-                      root: { fontSize: 18, color: "#0078D4" },
+                      root: { fontSize: 18, color: "#00695C" },
                     }}
                   />
                   <div style={{ flex: 1 }}>
@@ -1376,7 +1376,7 @@ export default function Admin() {
                                 <Icon
                                   iconName="Contact"
                                   styles={{
-                                    root: { marginRight: 6, fontSize: 13, color: "#0078D4" },
+                                    root: { marginRight: 6, fontSize: 13, color: "#00695C" },
                                   }}
                                 />
                                 {u.displayName}
@@ -1400,7 +1400,7 @@ export default function Admin() {
                                 <Icon
                                   iconName="Group"
                                   styles={{
-                                    root: { marginRight: 6, fontSize: 13, color: "#0078D4" },
+                                    root: { marginRight: 6, fontSize: 13, color: "#00695C" },
                                   }}
                                 />
                                 {g.displayName}
@@ -1427,7 +1427,7 @@ export default function Admin() {
                         styles={{
                           root: {
                             fontSize: 18,
-                            color: "#0078D4",
+                            color: "#00695C",
                           },
                         }}
                       />
@@ -1676,7 +1676,7 @@ export default function Admin() {
                           }
                           style={
                             isEditing
-                              ? { background: "#E8F0FE" }
+                              ? { background: "#E0F2F1" }
                               : undefined
                           }
                         >
@@ -1697,7 +1697,7 @@ export default function Admin() {
               <div className={styles.editBanner}>
                 <Icon
                   iconName="Edit"
-                  styles={{ root: { fontSize: 16, color: "#0078D4" } }}
+                  styles={{ root: { fontSize: 16, color: "#00695C" } }}
                 />
                 <span className={styles.editBannerText}>
                   Editing: {editingDataset.department}

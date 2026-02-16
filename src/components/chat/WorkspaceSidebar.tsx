@@ -20,8 +20,8 @@ interface Props {
 }
 
 const AGENT_COLORS: Record<string, string> = {
-  finance: "#0078D4",
-  asset: "#0078D4",
+  finance: "#00695C",
+  asset: "#00695C",
 };
 
 const styles = mergeStyleSets({
@@ -65,9 +65,9 @@ const styles = mergeStyleSets({
     transition: "all 0.15s",
     selectors: {
       ":hover": {
-        background: "#E8F0FE",
-        borderColor: "#0078D4",
-        color: "#0078D4",
+        background: "#E0F2F1",
+        borderColor: "#00695C",
+        color: "#00695C",
       },
     },
   },
@@ -92,7 +92,7 @@ const styles = mergeStyleSets({
     },
   },
   itemActive: {
-    background: "#E8F0FE",
+    background: "#E0F2F1",
     selectors: {
       ":hover": {
         background: "#DCEAFE",

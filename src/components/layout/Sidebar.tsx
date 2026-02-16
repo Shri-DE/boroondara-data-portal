@@ -38,12 +38,12 @@ const navStyles: Partial<INavStyles> = {
         color: '#1A1A1A',
       },
       '&.is-selected': {
-        background: '#E8F0FE',
-        color: '#0078D4',
+        background: '#E0F2F1',
+        color: '#00695C',
       },
       '&.is-selected:hover': {
-        background: '#D6E4F9',
-        color: '#0078D4',
+        background: '#C8EDE9',
+        color: '#00695C',
       },
     },
   },

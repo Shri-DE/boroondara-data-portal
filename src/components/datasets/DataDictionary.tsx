@@ -124,10 +124,10 @@ export default function DataDictionary({ datasetId, tableName, columns, onClose 
                   <td>
                     <code style={{
                       fontSize: 11,
-                      background: '#E8F0FE',
+                      background: '#E0F2F1',
                       padding: '2px 6px',
                       borderRadius: 4,
-                      color: '#0078D4',
+                      color: '#00695C',
                     }}>
                       {col.dataType}
                     </code>

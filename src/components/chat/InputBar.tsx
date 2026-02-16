@@ -39,7 +39,7 @@ const styles = mergeStyleSets({
     transition: "border-color 0.15s ease, box-shadow 0.15s ease",
     selectors: {
       ":focus-within": {
-        borderColor: "#0078D4",
+        borderColor: "#00695C",
         boxShadow: "0 0 0 2px rgba(0,120,212,0.15)",
       },
     },
@@ -85,8 +85,8 @@ const styles = mergeStyleSets({
     },
   },
   toolBtnActive: {
-    background: "#E8F0FE",
-    color: "#0078D4",
+    background: "#E0F2F1",
+    color: "#00695C",
   },
   spacer: {
     flex: 1,
@@ -102,11 +102,11 @@ const styles = mergeStyleSets({
     justifyContent: "center",
     flexShrink: 0,
     transition: "all 0.15s ease",
-    background: "#0078D4",
+    background: "#00695C",
     color: "#fff",
     selectors: {
       ":hover": {
-        background: "#004578",
+        background: "#004F45",
       },
     },
   },
@@ -128,7 +128,7 @@ const styles = mergeStyleSets({
     width: 14,
     height: 14,
     borderRadius: 7,
-    background: "#0067B8",
+    background: "#00695C",
     color: "#fff",
     fontSize: 9,
     fontWeight: 700,
