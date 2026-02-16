@@ -20,37 +20,32 @@ const agents = [
   {
     id: "finance",
     name: "Finance Agent",
-    description: "GL balances, budgets, AP, AR, journals and project spend insights for councils.",
+    description: "GL balances, budgets, AP invoices, purchase orders, journals and project spend from Oracle Fusion Cloud ERP.",
     category: "Finance",
     status: "active",
     enabled: true,
     hasAccess: true,
-    version: "0.1.0",
+    version: "0.2.0",
     exampleQueries: [
-      "Show YTD actuals vs budget by organisational unit for FY2025",
-      "Top 10 suppliers by total AP invoice amount",
+      "Top 10 suppliers by total AP invoice amount this financial year",
       "Outstanding AP invoices not yet fully paid",
-      "Capital project spend vs budget summary",
-      "Revenue breakdown by account classification",
-      "Show journal entries posted in the last 3 months"
+      "Show GL balance summary by account type for the current period",
+      "Purchase orders approved in the last 3 months by supplier",
+      "Project spend summary — actual vs burdened cost by project",
+      "Journal entries posted in the last month by source"
     ]
   },
   {
     id: "asset",
     name: "Asset Management Agent",
-    description: "Asset register, depreciation schedules, net book values, condition assessments and location reporting for councils.",
+    description: "Asset register and management data — being onboarded from a separate data source. Check back soon.",
     category: "Asset Management",
     status: "active",
-    enabled: true,
+    enabled: false,
     hasAccess: true,
-    version: "0.1.0",
+    version: "0.2.0",
     exampleQueries: [
-      "Show all assets by category with total net book value",
-      "Assets in poor or very poor condition",
-      "Total depreciation expense by asset category for FY2025",
-      "Assets approaching end of useful life within 2 years",
-      "Asset count and total acquisition cost by location",
-      "Condition assessment summary by category"
+      "What asset data is available?"
     ]
   }
 ];
