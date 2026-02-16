@@ -5,6 +5,9 @@ const fabricService = require("./services/fabricService");
 
 const router = express.Router();
 
+// Schema prefix for spatial tables (matches FABRIC_SCHEMA env var)
+const SCHEMA = process.env.FABRIC_SCHEMA || 'edp';
+
 // UUID format validator
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

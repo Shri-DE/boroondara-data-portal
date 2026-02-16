@@ -95,7 +95,7 @@ async function getValidColumns(tableName) {
   const result = await fabricService.executeQuery(`
     SELECT column_name, data_type
     FROM information_schema.columns
-    WHERE table_schema = 'dbo' AND table_name = '${tableName}'
+    WHERE table_schema = 'edp' AND table_name = '${tableName}'
     ORDER BY ordinal_position
   `);
   return result.rows;

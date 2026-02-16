@@ -74,11 +74,12 @@ async function getSchemaContext() {
     return schemaCache;
   }
 
-  // Fabric Warehouse uses dbo as the default schema
+  // Fabric Warehouse schema — configurable via FABRIC_SCHEMA env var
+  const schema = process.env.FABRIC_SCHEMA || 'edp';
   const result = await executeQuery(`
     SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, IS_NULLABLE
     FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_SCHEMA = 'dbo'
+    WHERE TABLE_SCHEMA = '${schema}'
     ORDER BY TABLE_NAME, ORDINAL_POSITION
   `);
 

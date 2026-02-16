@@ -179,7 +179,7 @@ router.get("/:id", async (req, res) => {
           const colResult = await fabricService.executeQuery(`
             SELECT column_name, data_type, is_nullable
             FROM information_schema.columns
-            WHERE table_schema = 'dbo' AND table_name = '${tableName}'
+            WHERE table_schema = 'edp' AND table_name = '${tableName}'
             ORDER BY ordinal_position
           `);
 
@@ -298,7 +298,7 @@ router.get("/:id/chart-data/:table", async (req, res) => {
     const colResult = await fabricService.executeQuery(`
       SELECT column_name, data_type, character_maximum_length
       FROM information_schema.columns
-      WHERE table_schema = 'dbo' AND table_name = '${tableName}'
+      WHERE table_schema = 'edp' AND table_name = '${tableName}'
       ORDER BY ordinal_position
     `);
 
@@ -444,7 +444,7 @@ router.get("/:id/sample-values/:table", async (req, res) => {
     const colResult = await fabricService.executeQuery(`
       SELECT column_name
       FROM information_schema.columns
-      WHERE table_schema = 'dbo' AND table_name = '${tableName}'
+      WHERE table_schema = 'edp' AND table_name = '${tableName}'
       ORDER BY ordinal_position
     `);
 

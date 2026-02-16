@@ -300,7 +300,7 @@ router.get("/tables", async (req, res) => {
     const result = await fabricService.executeQuery(`
       SELECT table_name
       FROM information_schema.tables
-      WHERE table_schema = 'dbo'
+      WHERE table_schema = 'edp'
         AND table_type = 'BASE TABLE'
       ORDER BY table_name
     `);

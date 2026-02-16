@@ -1,4 +1,4 @@
-# Build and deploy Enterprise Data Portal to Azure Web App
+# Build and deploy Enterprise Data Portal to Azure Web App (Linux)
 # Docs: https://github.com/Azure/webapps-deploy
 
 name: Build and deploy Enterprise Data Portal
@@ -21,7 +21,7 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '22.x'
+          node-version: '20.x'
 
       - name: Install dependencies
         run: npm install
@@ -30,6 +30,7 @@ jobs:
         env:
           REACT_APP_AZURE_AD_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
           REACT_APP_AZURE_AD_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
+          REACT_APP_ALLOWED_EMAIL_DOMAIN: ${{ secrets.ALLOWED_EMAIL_DOMAIN }}
         run: npm run build
 
       - name: Upload artifact for deployment job
@@ -48,6 +49,7 @@ jobs:
             geospatialRoutes.js
             services/
             data/
+            sql/
             package.json
             package-lock.json
 
@@ -78,6 +80,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'boroondara-data-portal'
+          app-name: 'boroondara-dev-data-portal'
           slot-name: 'Production'
           package: .
