@@ -48,7 +48,7 @@ jobs:
             onboardRoutes.js
             geospatialRoutes.js
             services/
-            data/
+            data/datasetCatalogue.json
             sql/
             package.json
             package-lock.json

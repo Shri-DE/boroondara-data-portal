@@ -18,6 +18,15 @@ const chatService = require("./services/chatService");
 const { requireUser } = require("./admin/requireUser");
 const path_data = require("path");
 const fs_data = require("fs").promises;
+const fs = require("fs");
+
+// -------------------------------
+// Ensure data directory and users.json exist (survives deploys)
+// -------------------------------
+const dataDir = path.join(__dirname, "data");
+if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+const usersBootstrap = path.join(dataDir, "users.json");
+if (!fs.existsSync(usersBootstrap)) fs.writeFileSync(usersBootstrap, "[]", "utf-8");
 
 const app = express();
 
