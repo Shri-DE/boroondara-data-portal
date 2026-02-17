@@ -41,9 +41,22 @@ REBUILD_MARKER="/home/site/.msnodesqlv8-rebuilt-${DEPLOY_STAMP}"
 # Clean up old marker files from previous deploys
 rm -f /home/site/.msnodesqlv8-rebuilt-* 2>/dev/null || true
 
-echo "Rebuilding msnodesqlv8 native module for this platform..."
-npm rebuild msnodesqlv8 2>&1
-echo "msnodesqlv8 rebuilt successfully"
+# Force source compilation — prebuild-install downloads a binary for Ubuntu
+# that segfaults on Debian 11. We delete prebuilt binaries and use node-gyp directly.
+echo "Rebuilding msnodesqlv8 from source for this platform..."
+MSNODESQLV8_DIR="$(node -e "console.log(require.resolve('msnodesqlv8/package.json').replace('/package.json',''))")"
+echo "  msnodesqlv8 location: $MSNODESQLV8_DIR"
+
+# Remove any prebuilt binaries so node-gyp must compile fresh
+rm -rf "$MSNODESQLV8_DIR/prebuilds" 2>/dev/null || true
+rm -rf "$MSNODESQLV8_DIR/build" 2>/dev/null || true
+
+# Compile from source using node-gyp
+cd "$MSNODESQLV8_DIR"
+npx node-gyp rebuild 2>&1
+cd /home/site/wwwroot
+
+echo "msnodesqlv8 rebuilt from source successfully"
 touch "$REBUILD_MARKER"
 
 # Start the Node.js application
