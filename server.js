@@ -214,19 +214,18 @@ const requiredEnv = [
   "AZURE_AI_ENDPOINT",
   "AZURE_AI_API_KEY",
 ];
-const dbRequired = ["FABRIC_SERVER"]; // need Fabric Warehouse config
 const missingEnv = requiredEnv.filter((k) => !process.env[k]);
-const hasDb = dbRequired.some((k) => process.env[k]);
 
-if (missingEnv.length > 0 || !hasDb) {
-  const msgs = [];
-  if (missingEnv.length > 0) msgs.push(`Missing: ${missingEnv.join(", ")}`);
-  if (!hasDb) msgs.push("Missing: FABRIC_SERVER (Fabric Warehouse connection required)");
-  console.warn(`⚠️  Environment config issues: ${msgs.join("; ")}`);
+if (missingEnv.length > 0) {
+  console.warn(`⚠️  Missing env vars: ${missingEnv.join(", ")}`);
+  // Only exit for truly required vars (AI endpoint); Fabric connects lazily
   if (process.env.NODE_ENV === "production") {
     console.error("Exiting due to missing required configuration in production.");
     process.exit(1);
   }
+}
+if (!process.env.FABRIC_SERVER) {
+  console.warn("⚠️  FABRIC_SERVER not set — Fabric Warehouse queries will fail until configured.");
 }
 
 // -------------------------------
@@ -234,26 +233,7 @@ if (missingEnv.length > 0 || !hasDb) {
 // -------------------------------
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server listening on 0.0.0.0:${PORT}`);
-
-  // Defer Fabric Warehouse connection to avoid killing the process on startup
-  // if the msnodesqlv8 native module has issues. The connection is attempted
-  // after a short delay so the HTTP server is already accepting requests.
-  setTimeout(async () => {
-    try {
-      await fabricService.initialize();
-      console.log("✅ Fabric Warehouse connected");
-
-      // Auto-initialize spatial tables + seed data
-      try {
-        await initializeSpatialTables();
-      } catch (spatialErr) {
-        console.warn("⚠️  Spatial tables initialization skipped:", spatialErr.message);
-      }
-    } catch (err) {
-      console.warn("⚠️  Database connection failed:", err.message);
-      console.warn("   The portal UI will work but data queries will fail.");
-    }
-  }, 2000);
+  console.log("   Portal UI is ready. Fabric Warehouse connects on first query.");
 });
 
 // Graceful shutdown
