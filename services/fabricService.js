@@ -1,12 +1,39 @@
 // services/fabricService.js — Microsoft Fabric Warehouse connection via ODBC
-// Uses the 'odbc' npm package (thin unixODBC wrapper) instead of msnodesqlv8
-// which segfaults on Debian 11 due to prebuilt binary incompatibility.
-const odbc = require("odbc");
+// Uses the 'odbc' npm package (thin unixODBC wrapper).
+// The native binding is rebuilt from source on Azure App Service (Debian 11)
+// by startup.sh to avoid segfaults from the Ubuntu 22.04 prebuilt binary.
+//
+// IMPORTANT: odbc is lazy-loaded (not required at module level) so that a
+// missing or broken native binding doesn't crash the entire server process.
 
+let odbc = null;
 let connectionPool = null;
 let schemaCache = null;
 let schemaCacheTime = 0;
+let odbcLoadError = null;
 const SCHEMA_CACHE_TTL = 60 * 60 * 1000; // 1 hour
+
+/**
+ * Attempt to load the odbc native module. Called once during initialize().
+ * If it fails (e.g. segfault-prone binary, missing .node file), the error
+ * is captured and all subsequent query calls return a clear error message.
+ */
+function loadOdbc() {
+  if (odbc) return odbc;
+  if (odbcLoadError) throw odbcLoadError;
+
+  try {
+    odbc = require("odbc");
+    return odbc;
+  } catch (err) {
+    odbcLoadError = new Error(
+      `Failed to load odbc native module: ${err.message}. ` +
+      `The native binding may need to be rebuilt for this platform. ` +
+      `Check startup.sh logs.`
+    );
+    throw odbcLoadError;
+  }
+}
 
 function buildConnectionString() {
   const server = process.env.FABRIC_SERVER;
@@ -37,8 +64,9 @@ function buildConnectionString() {
 async function getPool() {
   if (connectionPool) return connectionPool;
 
+  const odbcModule = loadOdbc();
   const connectionString = buildConnectionString();
-  connectionPool = await odbc.pool({
+  connectionPool = await odbcModule.pool({
     connectionString,
     initialSize: 2,
     maxSize: 10,
