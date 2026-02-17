@@ -55,16 +55,20 @@ if ! dpkg -s msodbcsql18 > /dev/null 2>&1; then
   START_T=$(date +%s)
   apt-get update -qq
   apt-get install -y -qq curl gnupg2 apt-utils > /dev/null 2>&1
-  curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add - 2>/dev/null
 
-  # Detect Debian version for correct repo
+  # Detect Debian version
   DEBIAN_VER=$(cat /etc/debian_version 2>/dev/null | cut -d. -f1)
+  echo "[startup]   Detected Debian $DEBIAN_VER"
+
+  # Use gpg --dearmor method (works on both Debian 11 and 12)
+  # apt-key is deprecated on Debian 12+
+  curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --batch --yes --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
+
   if [ "$DEBIAN_VER" = "12" ]; then
-    REPO_URL="https://packages.microsoft.com/config/debian/12/prod.list"
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/debian/12/prod bookworm main" > /etc/apt/sources.list.d/mssql-release.list
   else
-    REPO_URL="https://packages.microsoft.com/config/debian/11/prod.list"
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/debian/11/prod bullseye main" > /etc/apt/sources.list.d/mssql-release.list
   fi
-  curl -fsSL "$REPO_URL" > /etc/apt/sources.list.d/mssql-release.list
 
   apt-get update -qq
   ACCEPT_EULA=Y apt-get install -y -qq msodbcsql18 unixodbc-dev > /dev/null 2>&1
