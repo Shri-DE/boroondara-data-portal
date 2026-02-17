@@ -34,16 +34,17 @@ fi
 cd /home/site/wwwroot
 
 # Rebuild msnodesqlv8 native addon against this container's glibc + Node.js
-# Use a marker file to avoid rebuilding on every restart (only rebuild once per deploy)
-REBUILD_MARKER="/home/site/.msnodesqlv8-rebuilt-$(md5sum package-lock.json 2>/dev/null | cut -d' ' -f1 || echo 'none')"
-if [ ! -f "$REBUILD_MARKER" ]; then
-  echo "Rebuilding msnodesqlv8 native module for this platform..."
-  npm rebuild msnodesqlv8 2>&1 || echo "⚠️  msnodesqlv8 rebuild warning (may still work)"
-  touch "$REBUILD_MARKER"
-  echo "msnodesqlv8 rebuilt successfully"
-else
-  echo "msnodesqlv8 native module already rebuilt for this deploy"
-fi
+# Use a marker file keyed on the deploy timestamp to rebuild once per deploy
+DEPLOY_STAMP=$(stat -c %Y /home/site/wwwroot/package.json 2>/dev/null || echo "0")
+REBUILD_MARKER="/home/site/.msnodesqlv8-rebuilt-${DEPLOY_STAMP}"
+
+# Clean up old marker files from previous deploys
+rm -f /home/site/.msnodesqlv8-rebuilt-* 2>/dev/null || true
+
+echo "Rebuilding msnodesqlv8 native module for this platform..."
+npm rebuild msnodesqlv8 2>&1
+echo "msnodesqlv8 rebuilt successfully"
+touch "$REBUILD_MARKER"
 
 # Start the Node.js application
 node server.js

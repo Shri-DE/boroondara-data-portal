@@ -232,23 +232,28 @@ if (missingEnv.length > 0 || !hasDb) {
 // -------------------------------
 // Start server
 // -------------------------------
-app.listen(PORT, "0.0.0.0", async () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server listening on 0.0.0.0:${PORT}`);
 
-  // Test database connection on startup
-  try {
-    await fabricService.initialize();
-    console.log("✅ Fabric Warehouse connected");
-
-    // Auto-initialize spatial tables + seed data
+  // Defer Fabric Warehouse connection to avoid killing the process on startup
+  // if the msnodesqlv8 native module has issues. The connection is attempted
+  // after a short delay so the HTTP server is already accepting requests.
+  setTimeout(async () => {
     try {
-      await initializeSpatialTables();
-    } catch (spatialErr) {
-      console.warn("⚠️  Spatial tables initialization skipped:", spatialErr.message);
+      await fabricService.initialize();
+      console.log("✅ Fabric Warehouse connected");
+
+      // Auto-initialize spatial tables + seed data
+      try {
+        await initializeSpatialTables();
+      } catch (spatialErr) {
+        console.warn("⚠️  Spatial tables initialization skipped:", spatialErr.message);
+      }
+    } catch (err) {
+      console.warn("⚠️  Database connection failed:", err.message);
+      console.warn("   The portal UI will work but data queries will fail.");
     }
-  } catch (err) {
-    console.warn("⚠️  Database connection failed:", err.message);
-  }
+  }, 2000);
 });
 
 // Graceful shutdown

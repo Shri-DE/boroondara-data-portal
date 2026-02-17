@@ -1,5 +1,14 @@
 // services/fabricService.js — Microsoft Fabric Warehouse connection via ODBC
-const sql = require("msnodesqlv8");
+// msnodesqlv8 is loaded lazily to avoid segfault at require() time if the
+// native binary was compiled against a different glibc / Node.js version.
+let sql = null;
+
+function getSql() {
+  if (!sql) {
+    sql = require("msnodesqlv8");
+  }
+  return sql;
+}
 
 let pool = null;
 let schemaCache = null;
@@ -36,7 +45,7 @@ function createPool() {
 
   const connectionString = buildConnectionString();
 
-  pool = new sql.Pool({
+  pool = new (getSql()).Pool({
     connectionString,
     ceiling: 10,
     floor: 2,
