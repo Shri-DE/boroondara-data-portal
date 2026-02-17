@@ -1,16 +1,9 @@
 // services/fabricService.js — Microsoft Fabric Warehouse connection via ODBC
-// msnodesqlv8 is loaded lazily to avoid segfault at require() time if the
-// native binary was compiled against a different glibc / Node.js version.
-let sql = null;
+// Uses the 'odbc' npm package (thin unixODBC wrapper) instead of msnodesqlv8
+// which segfaults on Debian 11 due to prebuilt binary incompatibility.
+const odbc = require("odbc");
 
-function getSql() {
-  if (!sql) {
-    sql = require("msnodesqlv8");
-  }
-  return sql;
-}
-
-let pool = null;
+let connectionPool = null;
 let schemaCache = null;
 let schemaCacheTime = 0;
 const SCHEMA_CACHE_TTL = 60 * 60 * 1000; // 1 hour
@@ -37,43 +30,29 @@ function buildConnectionString() {
     `PWD=${clientSecret}`,
     "Encrypt=yes",
     "TrustServerCertificate=no",
+    "Connection Timeout=30",
   ].join(";");
 }
 
-function createPool() {
-  if (pool) return pool;
+async function getPool() {
+  if (connectionPool) return connectionPool;
 
   const connectionString = buildConnectionString();
-
-  pool = new (getSql()).Pool({
+  connectionPool = await odbc.pool({
     connectionString,
-    ceiling: 10,
-    floor: 2,
-    heartbeatSecs: 30,
-    inactivityTimeoutSecs: 300,
+    initialSize: 2,
+    maxSize: 10,
+    connectTimeout: 30,
+    idleTimeout: 300,
   });
 
-  pool.on("error", (err) => {
-    console.error("Unexpected Fabric Warehouse pool error:", err.message);
-  });
-
-  return pool;
-}
-
-function openPool(p) {
-  return new Promise((resolve, reject) => {
-    p.open((err) => {
-      if (err) reject(err);
-      else resolve();
-    });
-  });
+  return connectionPool;
 }
 
 async function initialize() {
-  const p = createPool();
-  await openPool(p);
+  const pool = await getPool();
   // Verify connection with a simple query
-  await executeQuery("SELECT 1 AS test");
+  await pool.query("SELECT 1 AS test");
   console.log("Fabric Warehouse connection verified");
 }
 
@@ -84,7 +63,7 @@ async function getSchemaContext() {
   }
 
   // Fabric Warehouse schema — configurable via FABRIC_SCHEMA env var
-  const schema = process.env.FABRIC_SCHEMA || 'edp';
+  const schema = process.env.FABRIC_SCHEMA || "edp";
   const result = await executeQuery(`
     SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, IS_NULLABLE
     FROM INFORMATION_SCHEMA.COLUMNS
@@ -117,42 +96,31 @@ async function getSchemaContext() {
 }
 
 async function executeQuery(sqlText) {
-  const p = createPool();
-  return new Promise((resolve, reject) => {
-    p.queryRaw(sqlText, (err, results) => {
-      if (err) return reject(err);
+  const pool = await getPool();
+  const result = await pool.query(sqlText);
 
-      const meta = results.meta || [];
-      const rawRows = results.rows || [];
+  // odbc returns an array of row objects directly
+  // with a 'columns' property containing metadata
+  const rows = Array.isArray(result) ? result : [];
+  const columns = result.columns || [];
 
-      // Convert array-of-arrays to array-of-objects (matching pg result shape)
-      const rows = rawRows.map((rawRow) => {
-        const obj = {};
-        for (let i = 0; i < meta.length; i++) {
-          obj[meta[i].name] = rawRow[i];
-        }
-        return obj;
-      });
+  // Map columns to fields format expected by responseFormatter
+  const fields = columns.map((col) => ({
+    name: col.name,
+    dataTypeID: col.dataType || "text",
+  }));
 
-      // Map meta to fields format expected by responseFormatter
-      const fields = meta.map((m) => ({
-        name: m.name,
-        dataTypeID: m.sqlType || m.type || "text",
-      }));
-
-      resolve({
-        rows,
-        fields,
-        rowCount: rows.length,
-      });
-    });
-  });
+  return {
+    rows,
+    fields,
+    rowCount: rows.length,
+  };
 }
 
 async function shutdown() {
-  if (pool) {
-    pool.close();
-    pool = null;
+  if (connectionPool) {
+    await connectionPool.close();
+    connectionPool = null;
     console.log("Fabric Warehouse pool closed");
   }
 }
