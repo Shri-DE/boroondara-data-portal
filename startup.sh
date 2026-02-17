@@ -128,26 +128,28 @@ else
     npx --yes node-gyp rebuild 2>&1 || true
   fi
 
-  # Find the compiled binary
-  BUILT=$(find "$ODBC_PKG" -name "odbc.node" -type f 2>/dev/null | head -1)
-
-  if [ -n "$BUILT" ]; then
-    # Make sure it's in the expected location
-    mkdir -p "$NAPI_DIR"
-    if [ "$BUILT" != "$NAPI_DIR/odbc.node" ]; then
-      cp "$BUILT" "$NAPI_DIR/odbc.node"
+  # Verify the binding was placed correctly by node-pre-gyp
+  # node-pre-gyp rebuild copies odbc.node to lib/bindings/napi-v8/ automatically
+  BINDING_FILE="$NAPI_DIR/odbc.node"
+  if [ ! -f "$BINDING_FILE" ]; then
+    # Fallback: find it wherever it ended up
+    BUILT=$(find "$ODBC_PKG" -name "odbc.node" -type f 2>/dev/null | head -1)
+    if [ -n "$BUILT" ]; then
+      mkdir -p "$NAPI_DIR"
+      cp "$BUILT" "$BINDING_FILE" 2>/dev/null || true
     fi
-    # Cache for future restarts
+  fi
+
+  if [ -f "$BINDING_FILE" ]; then
+    # Cache for future restarts (use cat to avoid cp "same file" error with hardlinks)
     mkdir -p "$(dirname "$CACHED_BINDING")"
-    cp "$NAPI_DIR/odbc.node" "$CACHED_BINDING"
+    cat "$BINDING_FILE" > "$CACHED_BINDING"
     END_T=$(date +%s)
     echo "[startup] [2/3] Compiled and cached ✓ ($(( END_T - START_T ))s)"
   else
     END_T=$(date +%s)
     echo "[startup] [2/3] WARNING: compilation produced no odbc.node ($(( END_T - START_T ))s)"
     echo "[startup]   Server will start but Fabric queries will fail."
-    echo "[startup]   Listing build dir:"
-    find "$ODBC_PKG/build" -type f -name "*.node" -o -name "*.o" 2>/dev/null | head -10 || echo "    (empty)"
   fi
 fi
 
