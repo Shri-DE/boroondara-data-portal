@@ -5,7 +5,7 @@ const path = require("path");
 const fs = require("fs").promises;
 
 const aiFoundryService = require("./services/aiFoundryService");
-const fabricService = require("./services/fabricService");
+const dbService = require("./services/dbService");
 const sqlValidator = require("./services/sqlValidator");
 const responseFormatter = require("./services/responseFormatter");
 
@@ -246,7 +246,7 @@ router.post("/:id/query", async (req, res) => {
 
   try {
     // Step 1: Get database schema context
-    const schemaContext = await fabricService.getSchemaContext();
+    const schemaContext = await dbService.getSchemaContext();
 
     // Step 2: Generate SQL from natural language via Azure AI Foundry
     const aiResult = await aiFoundryService.generateSQL(query, schemaContext, fileContext || undefined, agent.id, {
@@ -289,7 +289,7 @@ router.post("/:id/query", async (req, res) => {
     let dbResult;
     let usedSql = validation.sanitizedSql;
     try {
-      dbResult = await fabricService.executeQuery(usedSql);
+      dbResult = await dbService.executeQuery(usedSql);
     } catch (dbErr) {
       // Retry: send error back to AI for correction
       console.log("[RETRY] DB error, asking AI to fix:", dbErr.message);
@@ -301,7 +301,7 @@ router.post("/:id/query", async (req, res) => {
         if (retryResult.sql) {
           const retryValidation = sqlValidator.validate(retryResult.sql);
           if (retryValidation.valid) {
-            dbResult = await fabricService.executeQuery(retryValidation.sanitizedSql);
+            dbResult = await dbService.executeQuery(retryValidation.sanitizedSql);
             usedSql = retryValidation.sanitizedSql;
             // Update explanation from retry
             aiResult.explanation = retryResult.explanation || aiResult.explanation;

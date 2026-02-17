@@ -1,7 +1,7 @@
 // dashboardRoutes.js
-// Dashboard summary endpoint — aggregated KPIs and chart data from Fabric Warehouse
+// Dashboard summary endpoint — aggregated KPIs and chart data
 const express = require("express");
-const fabricService = require("./services/fabricService");
+const dbService = require("./services/dbService");
 
 const router = express.Router();
 
@@ -22,7 +22,7 @@ router.get("/summary", async (req, res) => {
       employeeCountResult,
     ] = await Promise.all([
       // 1. Total budget FY2025
-      fabricService.executeQuery(`
+      dbService.executeQuery(`
         SELECT
           COALESCE(SUM(CASE WHEN budget_amount < 0 THEN ABS(budget_amount) ELSE 0 END), 0) AS total_revenue_budget,
           COALESCE(SUM(CASE WHEN budget_amount > 0 THEN budget_amount ELSE 0 END), 0)     AS total_expense_budget,
@@ -32,7 +32,7 @@ router.get("/summary", async (req, res) => {
       `),
 
       // 2. Revenue vs Expenditure by account type (from GL)
-      fabricService.executeQuery(`
+      dbService.executeQuery(`
         SELECT
           coa.account_type,
           COALESCE(SUM(ABS(gl.ytd_activity)), 0) AS ytd_total
@@ -45,7 +45,7 @@ router.get("/summary", async (req, res) => {
       `),
 
       // 3. Accounts Payable summary
-      fabricService.executeQuery(`
+      dbService.executeQuery(`
         SELECT
           COUNT(*)                                                     AS invoice_count,
           COALESCE(SUM(total_amount - paid_amount), 0)                 AS outstanding_amount,
@@ -56,7 +56,7 @@ router.get("/summary", async (req, res) => {
       `),
 
       // 4. Asset condition distribution
-      fabricService.executeQuery(`
+      dbService.executeQuery(`
         SELECT
           condition_label,
           COUNT(*) AS count
@@ -74,7 +74,7 @@ router.get("/summary", async (req, res) => {
       `),
 
       // 5. Capital projects by status
-      fabricService.executeQuery(`
+      dbService.executeQuery(`
         SELECT
           status,
           COUNT(*)                           AS project_count,
@@ -87,7 +87,7 @@ router.get("/summary", async (req, res) => {
       `),
 
       // 6. Service requests by status
-      fabricService.executeQuery(`
+      dbService.executeQuery(`
         SELECT status, COUNT(*) AS count
         FROM service_requests
         GROUP BY status
@@ -95,7 +95,7 @@ router.get("/summary", async (req, res) => {
       `),
 
       // 7. Top expense categories (from GL joined to COA)
-      fabricService.executeQuery(`
+      dbService.executeQuery(`
         SELECT
           coa.account_classification,
           COALESCE(SUM(ABS(gl.ytd_activity)), 0) AS ytd_amount
@@ -106,11 +106,11 @@ router.get("/summary", async (req, res) => {
         WHERE coa.account_type = 'Expense'
         GROUP BY coa.account_classification
         ORDER BY ytd_amount DESC
-        OFFSET 0 ROWS FETCH NEXT 8 ROWS ONLY
+        LIMIT 8
       `),
 
       // 8. Employees by department (top 10)
-      fabricService.executeQuery(`
+      dbService.executeQuery(`
         SELECT
           department,
           COUNT(*)                                                          AS headcount,
@@ -120,14 +120,14 @@ router.get("/summary", async (req, res) => {
         FROM employees
         GROUP BY department
         ORDER BY headcount DESC
-        OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY
+        LIMIT 10
       `),
 
       // 9. Active asset count
-      fabricService.executeQuery(`SELECT COUNT(*) AS total FROM assets WHERE status = 'Active'`),
+      dbService.executeQuery(`SELECT COUNT(*) AS total FROM assets WHERE status = 'Active'`),
 
       // 10. Active employee count
-      fabricService.executeQuery(`SELECT COUNT(*) AS total FROM employees WHERE status = 'Active'`),
+      dbService.executeQuery(`SELECT COUNT(*) AS total FROM employees WHERE status = 'Active'`),
     ]);
 
     // Assemble KPIs

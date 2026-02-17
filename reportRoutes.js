@@ -4,7 +4,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs").promises;
 const { requireUser } = require("./admin/requireUser");
-const fabricService = require("./services/fabricService");
+const dbService = require("./services/dbService");
 
 const router = express.Router();
 
@@ -92,10 +92,10 @@ function isValidTable(dataset, tableName) {
 
 // ✅ Validate columns against information_schema
 async function getValidColumns(tableName) {
-  const result = await fabricService.executeQuery(`
+  const result = await dbService.executeQuery(`
     SELECT column_name, data_type
     FROM information_schema.columns
-    WHERE table_schema = 'edp' AND table_name = '${tableName}'
+    WHERE table_schema = 'public' AND table_name = '${tableName}'
     ORDER BY ordinal_position
   `);
   return result.rows;
@@ -197,22 +197,22 @@ function buildReportSQL(params) {
 
   if (groupBy && aggregation && aggregationColumn) {
     // GROUP BY with aggregation on a specific column
-    return `SELECT TOP ${limit} "${groupBy}", ${aggregation}("${aggregationColumn}") AS agg_value FROM "${table}" GROUP BY "${groupBy}" ORDER BY agg_value DESC`;
+    return `SELECT "${groupBy}", ${aggregation}("${aggregationColumn}") AS agg_value FROM "${table}" GROUP BY "${groupBy}" ORDER BY agg_value DESC LIMIT ${limit}`;
   }
 
   if (groupBy && aggregation === "COUNT") {
     // COUNT doesn't need aggregation column
-    return `SELECT TOP ${limit} "${groupBy}", COUNT(*) AS count FROM "${table}" GROUP BY "${groupBy}" ORDER BY count DESC`;
+    return `SELECT "${groupBy}", COUNT(*) AS count FROM "${table}" GROUP BY "${groupBy}" ORDER BY count DESC LIMIT ${limit}`;
   }
 
   if (groupBy) {
     // GROUP BY without explicit aggregation — default to COUNT
-    return `SELECT TOP ${limit} "${groupBy}", COUNT(*) AS count FROM "${table}" GROUP BY "${groupBy}" ORDER BY count DESC`;
+    return `SELECT "${groupBy}", COUNT(*) AS count FROM "${table}" GROUP BY "${groupBy}" ORDER BY count DESC LIMIT ${limit}`;
   }
 
   // Flat query — selected columns
   const colList = requestedColumns.map((c) => `"${c}"`).join(", ");
-  return `SELECT TOP ${limit} ${colList} FROM "${table}"`;
+  return `SELECT ${colList} FROM "${table}" LIMIT ${limit}`;
 }
 
 // ──────────────────────────────────────────
@@ -228,7 +228,7 @@ router.get("/query", async (req, res) => {
     const sql = buildReportSQL(params);
     console.log("[REPORTS] Executing:", sql);
 
-    const result = await fabricService.executeQuery(sql);
+    const result = await dbService.executeQuery(sql);
 
     res.json({
       rows: result.rows,
@@ -258,7 +258,7 @@ router.get("/export", async (req, res) => {
     const sql = buildReportSQL(params);
     console.log("[REPORTS] Exporting:", sql);
 
-    const result = await fabricService.executeQuery(sql);
+    const result = await dbService.executeQuery(sql);
 
     if (!result.rows || result.rows.length === 0) {
       return res.status(404).json({ error: "No data found" });

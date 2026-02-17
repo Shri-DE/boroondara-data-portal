@@ -4,7 +4,8 @@ require("dotenv").config(); // fallback to .env
 
 const express = require("express");
 const path = require("path");
-const fabricService = require("./services/fabricService");
+const dbService = require("./services/dbService");
+const fabricService = require("./services/fabricService"); // kept for graceful shutdown
 
 const adminRoutes = require("./admin/adminRoutes");
 const agentsRoutes = require("./agentsRoutes");
@@ -224,8 +225,8 @@ if (missingEnv.length > 0) {
     process.exit(1);
   }
 }
-if (!process.env.FABRIC_SERVER) {
-  console.warn("⚠️  FABRIC_SERVER not set — Fabric Warehouse queries will fail until configured.");
+if (!process.env.FABRIC_SERVER && !process.env.PGHOST) {
+  console.warn("⚠️  Neither PGHOST nor FABRIC_SERVER set — database queries will fail until configured.");
 }
 
 // -------------------------------
@@ -233,12 +234,27 @@ if (!process.env.FABRIC_SERVER) {
 // -------------------------------
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server listening on 0.0.0.0:${PORT}`);
-  console.log("   Portal UI is ready. Fabric Warehouse connects on first query.");
+
+  // Try to connect to the database after server is listening
+  const backend = process.env.DB_BACKEND || (process.env.PGHOST ? "postgres" : "fabric");
+  if (backend === "postgres" && process.env.PGHOST) {
+    dbService.initialize()
+      .then(() => {
+        console.log("   PostgreSQL connected. Checking spatial tables...");
+        return initializeSpatialTables().catch(() => {});
+      })
+      .catch((err) => {
+        console.warn("⚠️  PostgreSQL connection failed (will retry on first query):", err.message);
+      });
+  } else {
+    console.log("   Portal UI is ready. Database connects on first query.");
+  }
 });
 
 // Graceful shutdown
 process.on("SIGTERM", async () => {
   console.log("SIGTERM received, shutting down...");
-  await fabricService.shutdown();
+  try { await dbService.shutdown(); } catch {}
+  try { await fabricService.shutdown(); } catch {}
   process.exit(0);
 });

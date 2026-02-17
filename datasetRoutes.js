@@ -4,7 +4,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs").promises;
 const { requireUser } = require("./admin/requireUser");
-const fabricService = require("./services/fabricService");
+const dbService = require("./services/dbService");
 
 const router = express.Router();
 
@@ -109,7 +109,7 @@ router.get("/", async (req, res) => {
           tablesMeta = await Promise.all(
             dept.tables.map(async (tableName) => {
               try {
-                const countResult = await fabricService.executeQuery(
+                const countResult = await dbService.executeQuery(
                   `SELECT COUNT(*) AS row_count FROM "${tableName}"`
                 );
                 return {
@@ -176,15 +176,15 @@ router.get("/:id", async (req, res) => {
       dept.tables.map(async (tableName) => {
         try {
           // Column info
-          const colResult = await fabricService.executeQuery(`
+          const colResult = await dbService.executeQuery(`
             SELECT column_name, data_type, is_nullable
             FROM information_schema.columns
-            WHERE table_schema = 'edp' AND table_name = '${tableName}'
+            WHERE table_schema = 'public' AND table_name = '${tableName}'
             ORDER BY ordinal_position
           `);
 
           // Row count
-          const countResult = await fabricService.executeQuery(
+          const countResult = await dbService.executeQuery(
             `SELECT COUNT(*) AS row_count FROM "${tableName}"`
           );
 
@@ -252,8 +252,8 @@ router.get("/:id/preview/:table", async (req, res) => {
     }
 
     const tableName = req.params.table;
-    const result = await fabricService.executeQuery(
-      `SELECT TOP 10 * FROM "${tableName}"`
+    const result = await dbService.executeQuery(
+      `SELECT * FROM "${tableName}" LIMIT 10`
     );
 
     res.json({
@@ -295,10 +295,10 @@ router.get("/:id/chart-data/:table", async (req, res) => {
     const tableName = req.params.table;
 
     // 1. Introspect columns from information_schema
-    const colResult = await fabricService.executeQuery(`
+    const colResult = await dbService.executeQuery(`
       SELECT column_name, data_type, character_maximum_length
       FROM information_schema.columns
-      WHERE table_schema = 'edp' AND table_name = '${tableName}'
+      WHERE table_schema = 'public' AND table_name = '${tableName}'
       ORDER BY ordinal_position
     `);
 
@@ -361,8 +361,8 @@ router.get("/:id/chart-data/:table", async (req, res) => {
 
     // Fallback: if no label or no values, return raw top-10
     if (!labelCol || valueCols.length === 0) {
-      const raw = await fabricService.executeQuery(
-        `SELECT TOP 10 * FROM "${tableName}"`
+      const raw = await dbService.executeQuery(
+        `SELECT * FROM "${tableName}" LIMIT 10`
       );
       return res.json({
         table: tableName,
@@ -375,13 +375,13 @@ router.get("/:id/chart-data/:table", async (req, res) => {
       });
     }
 
-    // 4. Build aggregated query
+    // 4. Build aggregated query (PostgreSQL syntax)
     const selectLabel = useDate
-      ? `FORMAT(DATEFROMPARTS(YEAR("${labelCol}"), MONTH("${labelCol}"), 1), 'MMM yyyy') AS "${labelCol}"`
+      ? `TO_CHAR(DATE_TRUNC('month', "${labelCol}"), 'Mon YYYY') AS "${labelCol}"`
       : `"${labelCol}"`;
 
     const groupLabel = useDate
-      ? `DATEFROMPARTS(YEAR("${labelCol}"), MONTH("${labelCol}"), 1)`
+      ? `DATE_TRUNC('month', "${labelCol}")`
       : `"${labelCol}"`;
 
     const selectValues = valueCols
@@ -389,18 +389,19 @@ router.get("/:id/chart-data/:table", async (req, res) => {
       .join(", ");
 
     const orderCol = useDate
-      ? `DATEFROMPARTS(YEAR("${labelCol}"), MONTH("${labelCol}"), 1)`
+      ? `DATE_TRUNC('month', "${labelCol}")`
       : `SUM("${valueCols[0]}") DESC`;
 
     const sql = `
-      SELECT TOP 15 ${selectLabel}, ${selectValues}
+      SELECT ${selectLabel}, ${selectValues}
       FROM "${tableName}"
       WHERE "${labelCol}" IS NOT NULL
       GROUP BY ${groupLabel}
       ORDER BY ${orderCol}
+      LIMIT 15
     `;
 
-    const result = await fabricService.executeQuery(sql);
+    const result = await dbService.executeQuery(sql);
 
     res.json({
       table: tableName,
@@ -441,10 +442,10 @@ router.get("/:id/sample-values/:table", async (req, res) => {
     const tableName = req.params.table;
 
     // Get column names first
-    const colResult = await fabricService.executeQuery(`
+    const colResult = await dbService.executeQuery(`
       SELECT column_name
       FROM information_schema.columns
-      WHERE table_schema = 'edp' AND table_name = '${tableName}'
+      WHERE table_schema = 'public' AND table_name = '${tableName}'
       ORDER BY ordinal_position
     `);
 
@@ -452,10 +453,11 @@ router.get("/:id/sample-values/:table", async (req, res) => {
     const samplesByColumn = {};
     for (const col of colResult.rows) {
       try {
-        const sampleResult = await fabricService.executeQuery(
-          `SELECT DISTINCT TOP 5 "${col.column_name}" AS val
+        const sampleResult = await dbService.executeQuery(
+          `SELECT DISTINCT "${col.column_name}" AS val
            FROM "${tableName}"
-           WHERE "${col.column_name}" IS NOT NULL`
+           WHERE "${col.column_name}" IS NOT NULL
+           LIMIT 5`
         );
         samplesByColumn[col.column_name] = sampleResult.rows.map((r) => r.val);
       } catch {
@@ -494,8 +496,8 @@ router.get("/:id/export/:table", async (req, res) => {
     }
 
     const tableName = req.params.table;
-    const result = await fabricService.executeQuery(
-      `SELECT TOP ${MAX_EXPORT_ROWS} * FROM "${tableName}"`
+    const result = await dbService.executeQuery(
+      `SELECT * FROM "${tableName}" LIMIT ${MAX_EXPORT_ROWS}`
     );
 
     if (!result.rows || result.rows.length === 0) {

@@ -174,7 +174,7 @@ router.delete("/users/:upn", async (req, res) => {
 // ──────────────────────────────────────────
 
 const datasetRoutes = require("../datasetRoutes");
-const fabricService = require("../services/fabricService");
+const dbService = require("../services/dbService");
 
 const catalogueFile = path.join(dataDir, "datasetCatalogue.json");
 
@@ -297,10 +297,10 @@ router.delete("/datasets/:id", async (req, res) => {
 // GET /admin/tables — Discover all tables from information_schema
 router.get("/tables", async (req, res) => {
   try {
-    const result = await fabricService.executeQuery(`
+    const result = await dbService.executeQuery(`
       SELECT table_name
       FROM information_schema.tables
-      WHERE table_schema = 'edp'
+      WHERE table_schema = 'public'
         AND table_type = 'BASE TABLE'
       ORDER BY table_name
     `);
