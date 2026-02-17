@@ -1,13 +1,16 @@
 #!/bin/bash
-# Custom startup script for Azure App Service Linux (Debian 11 Bullseye)
+# Custom startup script for Azure App Service Linux
 # -----------------------------------------------------------------------
-# 1. Installs ODBC Driver 18 for SQL Server (required by the 'odbc' npm package).
-# 2. Rebuilds the 'odbc' native N-API addon FROM SOURCE on this container,
-#    because the prebuilt binary shipped by npm was compiled on Ubuntu 22.04
-#    and segfaults on Debian 11 due to glibc / ABI mismatch.
-# 3. Caches the compiled binary in /home/site/odbc-cache/ so subsequent
-#    container restarts skip the ~15-second compilation step.
-# 4. Starts the Node.js application.
+# The prebuilt odbc.node binary (compiled on Ubuntu 22.04 in CI) segfaults
+# on the Azure App Service Debian container due to glibc/ABI mismatch.
+#
+# This script compiles the odbc native addon FROM SOURCE on the actual
+# runtime container, caches the result in /home/site/ (persistent storage),
+# and uses node-pre-gyp rebuild (not install) to skip prebuilt downloads.
+#
+# NOTE: First startup requires WEBSITES_CONTAINER_START_TIME_LIMIT >= 600
+# to allow time for ODBC driver + build-essential + compilation.
+# Subsequent restarts use the cache and start in ~30s.
 # -----------------------------------------------------------------------
 
 set -e
@@ -17,77 +20,134 @@ CACHE_DIR="/home/site/odbc-cache"
 NODE_VER=$(node -v)
 CACHE_KEY="${NODE_VER}"
 
-# ── 1. Install ODBC Driver 18 if not already present ──
+echo "[startup] ============================================"
+echo "[startup] Boroondara Data Portal — startup.sh"
+echo "[startup] Node: $NODE_VER | $(date -u)"
+echo "[startup] ============================================"
+
+# Determine where node_modules actually lives
+# Azure extracts to /node_modules/ and symlinks from wwwroot
+if [ -d "/node_modules/odbc" ]; then
+  ODBC_PKG="/node_modules/odbc"
+elif [ -d "$APP_DIR/node_modules/odbc" ]; then
+  ODBC_PKG="$APP_DIR/node_modules/odbc"
+else
+  echo "[startup] ERROR: Cannot find odbc package in node_modules!"
+  echo "[startup] Checked: /node_modules/odbc and $APP_DIR/node_modules/odbc"
+  echo "[startup] Starting server without Fabric connection..."
+  cd "$APP_DIR"
+  exec node server.js
+fi
+echo "[startup] odbc package at: $ODBC_PKG"
+
+# Find the napi binding directory
+NAPI_DIR=$(ls -d "$ODBC_PKG/lib/bindings/napi-v"* 2>/dev/null | head -1)
+if [ -z "$NAPI_DIR" ]; then
+  NAPI_DIR="$ODBC_PKG/lib/bindings/napi-v8"
+fi
+echo "[startup] NAPI binding dir: $NAPI_DIR"
+
+CACHED_BINDING="$CACHE_DIR/$CACHE_KEY/odbc.node"
+
+# ── Step 1: Install ODBC Driver 18 if not present ──
 if ! dpkg -s msodbcsql18 > /dev/null 2>&1; then
-  echo "[startup] Installing ODBC Driver 18 for SQL Server..."
+  echo "[startup] [1/3] Installing ODBC Driver 18..."
+  START_T=$(date +%s)
   apt-get update -qq
   apt-get install -y -qq curl gnupg2 apt-utils > /dev/null 2>&1
   curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add - 2>/dev/null
-  curl -fsSL https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list
+
+  # Detect Debian version for correct repo
+  DEBIAN_VER=$(cat /etc/debian_version 2>/dev/null | cut -d. -f1)
+  if [ "$DEBIAN_VER" = "12" ]; then
+    REPO_URL="https://packages.microsoft.com/config/debian/12/prod.list"
+  else
+    REPO_URL="https://packages.microsoft.com/config/debian/11/prod.list"
+  fi
+  curl -fsSL "$REPO_URL" > /etc/apt/sources.list.d/mssql-release.list
+
   apt-get update -qq
   ACCEPT_EULA=Y apt-get install -y -qq msodbcsql18 unixodbc-dev > /dev/null 2>&1
-  echo "[startup] ODBC Driver 18 installed"
+  END_T=$(date +%s)
+  echo "[startup] [1/3] ODBC Driver 18 installed ($(( END_T - START_T ))s)"
 else
-  echo "[startup] ODBC Driver 18 already installed"
+  echo "[startup] [1/3] ODBC Driver 18 already present ✓"
 fi
 
-# ── 2. Rebuild 'odbc' native addon from source (or restore from cache) ──
-ODBC_BINDING="$APP_DIR/node_modules/odbc/lib/bindings/napi-v8/odbc.node"
-CACHED_BINDING="$CACHE_DIR/$CACHE_KEY/odbc.node"
-
+# ── Step 2: Get the correct native binding ──
 if [ -f "$CACHED_BINDING" ]; then
-  echo "[startup] Restoring cached odbc native binding ($CACHE_KEY)..."
-  mkdir -p "$(dirname "$ODBC_BINDING")"
-  cp "$CACHED_BINDING" "$ODBC_BINDING"
-  echo "[startup] Cached binding restored"
+  # Fast path: restore cached binding
+  echo "[startup] [2/3] Restoring cached odbc binding ($CACHE_KEY)..."
+  mkdir -p "$NAPI_DIR"
+  cp "$CACHED_BINDING" "$NAPI_DIR/odbc.node"
+  echo "[startup] [2/3] Cached binding restored ✓"
 else
-  echo "[startup] Rebuilding odbc native addon from source (first run for $CACHE_KEY)..."
+  # Slow path: compile from source
+  echo "[startup] [2/3] Compiling odbc from source (first run)..."
+  START_T=$(date +%s)
 
-  # Install build tools if missing
+  # Install build tools
   if ! command -v g++ > /dev/null 2>&1; then
-    echo "[startup] Installing build-essential and python3..."
+    echo "[startup]   Installing build-essential python3..."
     apt-get install -y -qq build-essential python3 > /dev/null 2>&1
   fi
-
-  # Ensure unixodbc-dev headers are present (needed for compilation)
   if [ ! -f /usr/include/sql.h ]; then
+    echo "[startup]   Installing unixodbc-dev..."
     apt-get install -y -qq unixodbc-dev > /dev/null 2>&1
   fi
 
-  cd "$APP_DIR"
+  cd "$ODBC_PKG"
 
-  # Force rebuild from source — delete any prebuilt binaries first
-  rm -f "$ODBC_BINDING" 2>/dev/null || true
-  rm -rf node_modules/odbc/build 2>/dev/null || true
+  # Remove the Ubuntu-compiled prebuilt binary that causes segfault
+  rm -f lib/bindings/*/odbc.node 2>/dev/null || true
+  rm -rf build 2>/dev/null || true
 
-  echo "[startup] Running npm rebuild odbc --build-from-source..."
-  npm rebuild odbc --build-from-source 2>&1
+  # Use node-pre-gyp REBUILD — this forces source compilation
+  # (unlike "install" which downloads a prebuilt binary first)
+  NODE_PRE_GYP="$(dirname "$ODBC_PKG")/@mapbox/node-pre-gyp/bin/node-pre-gyp"
+  if [ ! -f "$NODE_PRE_GYP" ]; then
+    # Try the global modules path
+    for DIR in /node_modules/@mapbox/node-pre-gyp/bin/node-pre-gyp \
+               "$APP_DIR/node_modules/@mapbox/node-pre-gyp/bin/node-pre-gyp"; do
+      if [ -f "$DIR" ]; then
+        NODE_PRE_GYP="$DIR"
+        break
+      fi
+    done
+  fi
 
-  # Verify the binding was created
-  if [ -f "$ODBC_BINDING" ]; then
-    echo "[startup] odbc native addon rebuilt successfully"
-    # Cache it for next restart
-    mkdir -p "$(dirname "$CACHED_BINDING")"
-    cp "$ODBC_BINDING" "$CACHED_BINDING"
-    echo "[startup] Binding cached at $CACHED_BINDING"
+  if [ -f "$NODE_PRE_GYP" ]; then
+    echo "[startup]   Running: node-pre-gyp rebuild (from $NODE_PRE_GYP)..."
+    node "$NODE_PRE_GYP" rebuild 2>&1
   else
-    # Check if it was built in the build/ directory instead
-    BUILT_BINDING=$(find node_modules/odbc/build -name "odbc.node" 2>/dev/null | head -1)
-    if [ -n "$BUILT_BINDING" ]; then
-      echo "[startup] Found built binding at $BUILT_BINDING, copying to expected location..."
-      mkdir -p "$(dirname "$ODBC_BINDING")"
-      cp "$BUILT_BINDING" "$ODBC_BINDING"
-      mkdir -p "$(dirname "$CACHED_BINDING")"
-      cp "$BUILT_BINDING" "$CACHED_BINDING"
-      echo "[startup] Binding copied and cached"
-    else
-      echo "[startup] WARNING: odbc native addon rebuild may have failed"
-      echo "[startup] The server will start but database queries will not work"
+    echo "[startup]   node-pre-gyp not found, using node-gyp directly..."
+    npx --yes node-gyp rebuild 2>&1 || true
+  fi
+
+  # Find the compiled binary
+  BUILT=$(find "$ODBC_PKG" -name "odbc.node" -type f 2>/dev/null | head -1)
+
+  if [ -n "$BUILT" ]; then
+    # Make sure it's in the expected location
+    mkdir -p "$NAPI_DIR"
+    if [ "$BUILT" != "$NAPI_DIR/odbc.node" ]; then
+      cp "$BUILT" "$NAPI_DIR/odbc.node"
     fi
+    # Cache for future restarts
+    mkdir -p "$(dirname "$CACHED_BINDING")"
+    cp "$NAPI_DIR/odbc.node" "$CACHED_BINDING"
+    END_T=$(date +%s)
+    echo "[startup] [2/3] Compiled and cached ✓ ($(( END_T - START_T ))s)"
+  else
+    END_T=$(date +%s)
+    echo "[startup] [2/3] WARNING: compilation produced no odbc.node ($(( END_T - START_T ))s)"
+    echo "[startup]   Server will start but Fabric queries will fail."
+    echo "[startup]   Listing build dir:"
+    find "$ODBC_PKG/build" -type f -name "*.node" -o -name "*.o" 2>/dev/null | head -10 || echo "    (empty)"
   fi
 fi
 
-# ── 3. Start the Node.js application ──
+# ── Step 3: Start Node.js ──
 cd "$APP_DIR"
-echo "[startup] Starting Node.js application..."
+echo "[startup] [3/3] Starting Node.js application..."
 exec node server.js
