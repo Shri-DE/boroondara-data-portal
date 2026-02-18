@@ -130,4 +130,4 @@ async function shutdown() {
   }
 }
 
-module.exports = { initialize, getSchemaContext, executeQuery, shutdown };
+module.exports = { initialize, getSchemaContext, executeQuery, shutdown, getPool };

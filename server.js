@@ -6,6 +6,7 @@ const express = require("express");
 const path = require("path");
 const dbService = require("./services/dbService");
 const fabricService = require("./services/fabricService"); // kept for graceful shutdown
+const { bootstrap } = require("./services/dbBootstrap");
 
 const adminRoutes = require("./admin/adminRoutes");
 const agentsRoutes = require("./agentsRoutes");
@@ -239,8 +240,14 @@ app.listen(PORT, "0.0.0.0", () => {
   const backend = process.env.DB_BACKEND || (process.env.PGHOST ? "postgres" : "fabric");
   if (backend === "postgres" && process.env.PGHOST) {
     dbService.initialize()
-      .then(() => {
-        console.log("   PostgreSQL connected. Checking spatial tables...");
+      .then(async () => {
+        console.log("   PostgreSQL connected. Running bootstrap check...");
+        try {
+          await bootstrap(dbService);
+        } catch (bErr) {
+          console.warn("⚠️  Bootstrap error (non-fatal):", bErr.message);
+        }
+        console.log("   Checking spatial tables...");
         return initializeSpatialTables().catch(() => {});
       })
       .catch((err) => {

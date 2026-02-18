@@ -311,4 +311,16 @@ router.get("/tables", async (req, res) => {
   }
 });
 
+// POST /admin/bootstrap — Run DDL + seed scripts to initialise the database
+router.post("/bootstrap", async (req, res) => {
+  try {
+    const { bootstrap } = require("../services/dbBootstrap");
+    const result = await bootstrap(dbService);
+    res.json(result);
+  } catch (err) {
+    console.error("Bootstrap failed:", err);
+    res.status(500).json({ error: "Bootstrap failed: " + err.message });
+  }
+});
+
 module.exports = router;
