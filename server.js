@@ -186,9 +186,30 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-// Health check (optional but useful)
-app.get("/api/health", (req, res) => {
-  res.json({ ok: true, time: new Date().toISOString() });
+// Health check with database status
+app.get("/api/health", async (req, res) => {
+  const info = { ok: true, time: new Date().toISOString(), db: "unknown" };
+  try {
+    const result = await dbService.executeQuery(
+      `SELECT COUNT(*) AS tables FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'`
+    );
+    const tableCount = Number(result.rows[0]?.tables || 0);
+    let rowSample = 0;
+    if (tableCount > 0) {
+      try {
+        const r = await dbService.executeQuery(`SELECT COUNT(*) AS cnt FROM councils`);
+        rowSample = Number(r.rows[0]?.cnt || 0);
+      } catch {}
+    }
+    info.db = "connected";
+    info.tables = tableCount;
+    info.councilRows = rowSample;
+    info.bootstrapped = tableCount > 5 && rowSample > 0;
+  } catch (err) {
+    info.db = "error";
+    info.dbError = err.message;
+  }
+  res.json(info);
 });
 
 // API safety net: any unknown /api route returns JSON (never HTML)
