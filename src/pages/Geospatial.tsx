@@ -313,12 +313,12 @@ export default function Geospatial() {
         <div className={styles.headerRow}>
           <div className={styles.title}>Spatial Data Explorer</div>
           <div className={styles.subtitle}>
-            Interactive map view of Manningham City Council spatial data. Toggle layers to explore
+            Interactive map view of City of Boroondara spatial data. Toggle layers to explore
             council facilities, parks, infrastructure assets, ward boundaries, street trees and planning zones.
             Click any feature for detailed information.
           </div>
           <div className={styles.chipRow}>
-            <span className={styles.chip}><Icon iconName="CityNext" styles={{ root: { fontSize: 12 } }} /> Manningham City Council</span>
+            <span className={styles.chip}><Icon iconName="CityNext" styles={{ root: { fontSize: 12 } }} /> City of Boroondara</span>
             <span className={styles.chip}><Icon iconName="Globe" styles={{ root: { fontSize: 12 } }} /> {stats?.totalLayers || 0} Layers</span>
             <span className={styles.chip}><Icon iconName="MapPin" styles={{ root: { fontSize: 12 } }} /> {stats?.totalFeatures?.toLocaleString() || 0} Features</span>
             <span className={styles.chip}><Icon iconName="Shield" styles={{ root: { fontSize: 12 } }} /> PostGIS / GDA2020</span>
