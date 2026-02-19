@@ -23,8 +23,9 @@ const SQL_SCRIPTS = [
 ];
 
 /**
- * Check whether the database has been bootstrapped already
- * by looking for the existence of the councils table.
+ * Check whether the database needs bootstrapping.
+ * Returns "full" if tables don't exist, "seed" if tables exist but are empty,
+ * or false if everything looks populated.
  */
 async function needsBootstrap(dbService) {
   try {
@@ -32,15 +33,20 @@ async function needsBootstrap(dbService) {
       SELECT 1 FROM information_schema.tables
       WHERE table_schema = 'public' AND table_name = 'councils'
     `);
-    if (result.rows.length === 0) return true;
+    if (result.rows.length === 0) return "full";
 
-    // Table exists — check if it has any rows (seed data loaded?)
+    // Tables exist — check if seed data has been loaded
+    // Check a table that only gets populated by the seed script (not just DDL+council)
     const countResult = await dbService.executeQuery(
-      `SELECT COUNT(*) AS cnt FROM councils`
+      `SELECT COUNT(*) AS cnt FROM employees`
     );
-    return Number(countResult.rows[0]?.cnt || 0) === 0;
+    const empCount = Number(countResult.rows[0]?.cnt || 0);
+    if (empCount > 0) return false; // Seed data present
+
+    // Tables exist, council exists, but no seed data
+    return "seed";
   } catch {
-    return true; // if we can't even query, we need bootstrap
+    return "full"; // if we can't even query, we need full bootstrap
   }
 }
 
@@ -50,7 +56,6 @@ async function needsBootstrap(dbService) {
  *   - Single-line comments (-- ...)
  *   - Multi-statement files separated by ;
  *   - DO $$ ... END $$; blocks (preserved as single statements)
- *   - String literals with embedded semicolons
  */
 function splitStatements(sql) {
   const statements = [];
@@ -106,13 +111,18 @@ function splitStatements(sql) {
 async function bootstrap(dbService) {
   console.log("[BOOTSTRAP] Checking if database needs initialization...");
 
-  const needed = await needsBootstrap(dbService);
-  if (!needed) {
+  const mode = await needsBootstrap(dbService);
+  if (!mode) {
     console.log("[BOOTSTRAP] Database already initialized — skipping.");
     return { bootstrapped: false, message: "Already initialized" };
   }
 
-  console.log("[BOOTSTRAP] Database is empty — running initialization scripts...");
+  console.log(`[BOOTSTRAP] Mode: ${mode} — running initialization scripts...`);
+
+  // If mode is "seed", skip DDL scripts (tables already exist)
+  const scriptsToRun = mode === "seed"
+    ? SQL_SCRIPTS.filter(s => !s.file.includes("ddl"))
+    : SQL_SCRIPTS;
 
   // Get a dedicated client so SET statement_timeout persists across queries
   const pool = pgService.getPool();
@@ -123,7 +133,7 @@ async function bootstrap(dbService) {
     // 5-minute timeout for large seed scripts
     await client.query(`SET statement_timeout = '300s'`);
 
-    for (const script of SQL_SCRIPTS) {
+    for (const script of scriptsToRun) {
       const filePath = path.join(SQL_DIR, script.file);
       try {
         const sql = await fs.readFile(filePath, "utf-8");
@@ -143,7 +153,6 @@ async function bootstrap(dbService) {
           try {
             await client.query(stmt);
           } catch (stmtErr) {
-            // Log individual statement failures but don't abort unless fatal
             const preview = stmt.substring(0, 120).replace(/\n/g, " ");
             console.error(`[BOOTSTRAP]    stmt ${stmtIndex}/${stmts.length} failed: ${stmtErr.message}`);
             console.error(`[BOOTSTRAP]    SQL: ${preview}...`);

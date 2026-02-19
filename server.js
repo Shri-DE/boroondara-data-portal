@@ -212,6 +212,32 @@ app.get("/api/health", async (req, res) => {
   res.json(info);
 });
 
+// Seed endpoint — run bootstrap on demand and return detailed results
+app.get("/api/seed", async (req, res) => {
+  try {
+    const { bootstrap } = require("./services/dbBootstrap");
+    const result = await bootstrap(dbService);
+    // Also get table row counts for verification
+    const counts = {};
+    try {
+      const tables = ["councils","organizational_units","chart_of_accounts","budget_lines",
+        "gl_balances","suppliers","customers","ap_invoices","employees","assets","projects",
+        "service_requests","spatial_layers","spatial_features"];
+      for (const t of tables) {
+        try {
+          const r = await dbService.executeQuery(`SELECT COUNT(*) AS cnt FROM "${t}"`);
+          counts[t] = Number(r.rows[0]?.cnt || 0);
+        } catch (e) {
+          counts[t] = "error: " + e.message;
+        }
+      }
+    } catch {}
+    res.json({ ...result, counts });
+  } catch (err) {
+    res.status(500).json({ error: err.message, stack: err.stack });
+  }
+});
+
 // API safety net: any unknown /api route returns JSON (never HTML)
 app.use("/api", (req, res) => {
   res.status(404).json({ error: "Not Found", path: req.originalUrl });
