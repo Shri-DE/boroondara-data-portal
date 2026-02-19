@@ -37,15 +37,24 @@ async function needsBootstrap(dbService) {
     if (result.rows.length === 0) return "full";
 
     // Tables exist — check if seed data has been loaded
-    // Check a table that only gets populated by the seed script (not just DDL+council)
     const countResult = await dbService.executeQuery(
       `SELECT COUNT(*) AS cnt FROM employees`
     );
     const empCount = Number(countResult.rows[0]?.cnt || 0);
-    if (empCount > 0) return false; // Seed data present
+    if (empCount === 0) return "seed"; // Tables exist but no seed data
 
-    // Tables exist, council exists, but no seed data
-    return "seed";
+    // Seed data present — check if spatial tables exist
+    try {
+      const spatialResult = await dbService.executeQuery(`
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'spatial_layers'
+      `);
+      if (spatialResult.rows.length === 0) return "spatial";
+    } catch {
+      return "spatial";
+    }
+
+    return false; // Everything looks good
   } catch {
     return "full"; // if we can't even query, we need full bootstrap
   }
@@ -120,10 +129,19 @@ async function bootstrap(dbService) {
 
   console.log(`[BOOTSTRAP] Mode: ${mode} — running initialization scripts...`);
 
-  // If mode is "seed", still run ALTER (to add missing columns) but skip DDL creates
-  const scriptsToRun = mode === "seed"
-    ? SQL_SCRIPTS.filter(s => !s.ddl || s.file.includes("alter"))
-    : SQL_SCRIPTS;
+  // Filter scripts based on mode
+  let scriptsToRun;
+  if (mode === "spatial") {
+    // Only run spatial DDL + spatial seed
+    scriptsToRun = SQL_SCRIPTS.filter(s =>
+      s.file.includes("spatial") || s.file.includes("alter")
+    );
+  } else if (mode === "seed") {
+    // Run ALTER (add missing columns) + seed scripts, skip DDL creates
+    scriptsToRun = SQL_SCRIPTS.filter(s => !s.ddl || s.file.includes("alter"));
+  } else {
+    scriptsToRun = SQL_SCRIPTS;
+  }
 
   // Get a dedicated client so SET statement_timeout persists across queries
   const pool = pgService.getPool();
