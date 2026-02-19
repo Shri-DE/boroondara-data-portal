@@ -15,6 +15,7 @@ const dashboardRoutes = require("./dashboardRoutes");
 const reportRoutes = require("./reportRoutes");
 const onboardRoutes = require("./onboardRoutes");
 const geospatialRoutes = require("./geospatialRoutes");
+const absRoutes = require("./absRoutes");
 const { initializeSpatialTables } = geospatialRoutes;
 const chatService = require("./services/chatService");
 const { requireUser } = require("./admin/requireUser");
@@ -54,6 +55,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/onboard", onboardRoutes);
 app.use("/api/spatial", geospatialRoutes);
+app.use("/api/abs", absRoutes);
 
 // ── GET /api/me — Current user profile with access flags ──
 const PORTAL_ADMINS_ME = (process.env.PORTAL_ADMINS || "")
@@ -228,7 +230,8 @@ app.get("/api/seed", async (req, res) => {
     try {
       const tables = ["councils","organizational_units","chart_of_accounts","budget_lines",
         "gl_balances","suppliers","customers","ap_invoices","employees","assets","projects",
-        "service_requests","spatial_layers","spatial_features"];
+        "service_requests","spatial_layers","spatial_features",
+        "abs_sa2_areas","abs_demographics","abs_housing","abs_income","abs_education","abs_employment","abs_cultural_diversity"];
       for (const t of tables) {
         try {
           const r = await dbService.executeQuery(`SELECT COUNT(*) AS cnt FROM "${t}"`);

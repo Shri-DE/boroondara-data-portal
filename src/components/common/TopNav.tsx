@@ -26,6 +26,7 @@ const navItems: NavItem[] = [
   { key: "dashboards", label: "Dashboards", path: "/dashboards" },
   { key: "reports", label: "Reports", path: "/reports" },
   { key: "geospatial", label: "Geospatial", path: "/geospatial" },
+  { key: "abs", label: "Boroondara ABS", path: "/abs" },
   { key: "admin", label: "Admin", path: "/admin", adminOnly: true },
 ];
 

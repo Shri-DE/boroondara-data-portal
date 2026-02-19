@@ -47,6 +47,24 @@ const agents = [
     exampleQueries: [
       "What asset data is available?"
     ]
+  },
+  {
+    id: "abs",
+    name: "Council ABS Agent",
+    description: "Australian Bureau of Statistics Census data for City of Boroondara — demographics, housing, income, education, employment and cultural diversity by suburb (SA2 area).",
+    category: "Census & Demographics",
+    status: "active",
+    enabled: true,
+    hasAccess: true,
+    version: "1.0.0",
+    exampleQueries: [
+      "What is the total population of Boroondara from the 2021 Census?",
+      "Compare median household income across all SA2 areas",
+      "Which suburb has the highest percentage of university-educated residents?",
+      "Show housing tenure breakdown for Hawthorn vs Kew",
+      "Top countries of birth for overseas-born residents in Camberwell",
+      "How has the unemployment rate changed between 2016 and 2021 by suburb?"
+    ]
   }
 ];
 

@@ -100,6 +100,57 @@ KEY TABLES:
 
 Use PostgreSQL syntax. Tables are in the public schema.`,
   },
+  abs: {
+    description: "Council ABS Agent — Australian Bureau of Statistics Census demographics, housing, income, education, employment and cultural diversity for City of Boroondara.",
+    tableHints: `You are the ABS CENSUS agent for the City of Boroondara. You query ABS Census data stored in PostgreSQL tables.
+
+IMPORTANT RULES:
+- Tables are in the public schema. Do NOT prefix table names with a schema.
+- Data covers two census years: 2016 and 2021.
+- Data is broken down by SA2 statistical areas (suburbs) within Boroondara LGA.
+- Always join topic tables to abs_sa2_areas to get the suburb name.
+- Use census_year to filter or compare across years.
+
+KEY TABLES:
+- abs_sa2_areas (sa2_id, council_id, sa2_code, sa2_name, lga_code, lga_name, area_sqkm, is_active)
+  → 14 SA2 areas: Balwyn, Balwyn North, Camberwell, Canterbury, Deepdene, Glen Iris - East, Glen Iris - West, Hawthorn, Hawthorn East, Kew, Kew East, Mont Albert, Surrey Hills - North, Surrey Hills - South
+
+DEMOGRAPHICS:
+- abs_demographics (demographic_id, sa2_id, census_year, population_total, population_male, population_female, median_age, persons_0_14, persons_15_24, persons_25_44, persons_45_64, persons_65_plus, indigenous_persons, australian_citizens)
+  → Joins to abs_sa2_areas via sa2_id
+  → Age groups are counts of persons in that age bracket
+
+HOUSING:
+- abs_housing (housing_id, sa2_id, census_year, total_dwellings, separate_houses, semi_detached, apartments, owned_outright, owned_mortgage, rented, median_rent_weekly, median_mortgage_monthly, avg_household_size, avg_bedrooms)
+  → Dwelling types and tenure are counts of dwellings
+  → median_rent_weekly in dollars, median_mortgage_monthly in dollars
+
+INCOME:
+- abs_income (income_id, sa2_id, census_year, median_household_weekly, median_personal_weekly, hh_income_0_649, hh_income_650_1249, hh_income_1250_1999, hh_income_2000_2999, hh_income_3000_plus, gini_coefficient)
+  → Income bracket columns are counts of households in each weekly income range
+  → Median values are in dollars per week
+
+EDUCATION:
+- abs_education (education_id, sa2_id, census_year, bachelor_or_higher, diploma_cert, year_12_or_equiv, below_year_12, attending_school, attending_tafe, attending_university, preschool_enrolled)
+  → All values are person counts
+
+EMPLOYMENT:
+- abs_employment (employment_id, sa2_id, census_year, labour_force_total, employed_full_time, employed_part_time, unemployed, not_in_labour_force, unemployment_rate, top_occupation_1, top_occupation_2, top_occupation_3, top_industry_1, top_industry_2, top_industry_3, commute_car, commute_public_transport, commute_walk_cycle, work_from_home)
+  → unemployment_rate is a percentage (e.g., 3.5)
+  → Commute columns are person counts
+  → top_occupation and top_industry columns contain text labels
+
+CULTURAL DIVERSITY:
+- abs_cultural_diversity (diversity_id, sa2_id, census_year, born_australia, born_overseas, born_top_country_1, born_top_country_1_name, born_top_country_2, born_top_country_2_name, born_top_country_3, born_top_country_3_name, speaks_english_only, speaks_other_language, top_language_2, top_language_2_name, top_language_3, top_language_3_name, top_language_4, top_language_4_name, ancestry_top_1, ancestry_top_1_name, ancestry_top_2, ancestry_top_2_name, ancestry_top_3, ancestry_top_3_name)
+  → Count columns (born_australia, born_overseas, etc.) are person counts
+  → Name columns contain text labels (e.g., 'China', 'Mandarin', 'English')
+
+COMMON PATTERNS:
+- For population totals: SELECT SUM(population_total) FROM abs_demographics d JOIN abs_sa2_areas a ON d.sa2_id = a.sa2_id WHERE d.census_year = 2021
+- For comparisons: GROUP BY a.sa2_name ORDER BY metric DESC
+- For change over time: Use self-join on sa2_id with different census_year values
+- For percentages: Calculate ROUND(100.0 * numerator / NULLIF(denominator, 0), 1)`,
+  },
 };
 
 async function generateSQL(query, schemaContext, fileContext, agentId, datasetOpts) {

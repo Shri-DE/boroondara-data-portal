@@ -12,6 +12,7 @@ import Datasets from "./pages/Datasets";
 import Dashboards from "./pages/Dashboards";
 import Reports from "./pages/Reports";
 import Geospatial from "./pages/Geospatial";
+import BoroondraABS from "./pages/BoroondraABS";
 import AuthRedirect from "./pages/AuthRedirect";
 
 export default function App() {
@@ -74,6 +75,15 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Geospatial />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/abs"
+          element={
+            <ProtectedRoute>
+              <BoroondraABS />
             </ProtectedRoute>
           }
         />

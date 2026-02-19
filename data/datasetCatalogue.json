@@ -1,5 +1,18 @@
 [
   {
+    "id": "abs-census",
+    "department": "ABS Census & Demographics",
+    "icon": "BarChart4",
+    "color": "#10B981",
+    "classification": "OFFICIAL",
+    "owner": "Strategy & Performance",
+    "ownerEmail": "strategy@boroondara.vic.gov.au",
+    "agentId": "abs",
+    "description": "Australian Bureau of Statistics Census data for City of Boroondara — demographics, housing, income, education, employment and cultural diversity by SA2 area.",
+    "tables": ["abs_sa2_areas", "abs_demographics", "abs_housing", "abs_income", "abs_education", "abs_employment", "abs_cultural_diversity"],
+    "status": "active"
+  },
+  {
     "id": "financial-services",
     "department": "Financial Services",
     "icon": "Money",

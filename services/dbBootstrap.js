@@ -17,10 +17,12 @@ const SQL_DIR = path.join(__dirname, "..", "sql");
 const SQL_SCRIPTS = [
   { file: "pg-01-ddl.sql",          fatal: true,  ddl: true },  // core tables + pgcrypto
   { file: "pg-02-spatial-ddl.sql",   fatal: false, ddl: true },  // PostGIS tables (non-fatal)
+  { file: "pg-05-abs-ddl.sql",      fatal: false, ddl: true },  // ABS Census tables
   { file: "pg-04-alter-columns.sql", fatal: false, ddl: true },  // add missing columns to existing tables
   { file: "pg-00-council.sql",       fatal: true,  ddl: false }, // bootstrap council record
   { file: "02-seed-data.sql",        fatal: false, ddl: false }, // comprehensive seed data
   { file: "pg-03-spatial-seed.sql",  fatal: false, ddl: false }, // spatial layers + features
+  { file: "pg-06-abs-seed.sql",     fatal: false, ddl: false }, // ABS Census seed data
 ];
 
 /**
@@ -230,6 +232,13 @@ async function resetAndReseed(dbService) {
     // Using CASCADE to handle foreign key constraints
     const truncateSQL = `
       TRUNCATE TABLE
+        abs_cultural_diversity,
+        abs_employment,
+        abs_education,
+        abs_income,
+        abs_housing,
+        abs_demographics,
+        abs_sa2_areas,
         spatial_features,
         spatial_layers,
         facility_bookings,
