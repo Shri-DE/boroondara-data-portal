@@ -4,8 +4,13 @@
 -- Target: Azure Database for PostgreSQL Flexible Server
 -- ============================================================
 
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- gen_random_uuid() is built-in on PostgreSQL 13+.
+-- pgcrypto is only needed for older versions — skip if unavailable.
+DO $$ BEGIN
+  CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+EXCEPTION WHEN OTHERS THEN
+  RAISE NOTICE 'pgcrypto not available — using built-in gen_random_uuid()';
+END $$;
 
 -- =========================
 --  CORE: Councils

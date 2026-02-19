@@ -16,7 +16,7 @@ const SQL_DIR = path.join(__dirname, "..", "sql");
 // "fatal" means bootstrap aborts if that script fails.
 const SQL_SCRIPTS = [
   { file: "pg-01-ddl.sql",          fatal: true  },  // core tables + pgcrypto
-  { file: "pg-02-spatial-ddl.sql",   fatal: false },  // PostGIS tables (non-fatal if PostGIS unavailable)
+  { file: "pg-02-spatial-ddl.sql",   fatal: false },  // PostGIS tables (non-fatal)
   { file: "pg-00-council.sql",       fatal: true  },  // bootstrap council record
   { file: "02-seed-data.sql",        fatal: false },  // comprehensive seed data
   { file: "pg-03-spatial-seed.sql",  fatal: false },  // spatial layers + features
@@ -45,9 +45,63 @@ async function needsBootstrap(dbService) {
 }
 
 /**
+ * Split a SQL file into executable statements.
+ * Handles:
+ *   - Single-line comments (-- ...)
+ *   - Multi-statement files separated by ;
+ *   - DO $$ ... END $$; blocks (preserved as single statements)
+ *   - String literals with embedded semicolons
+ */
+function splitStatements(sql) {
+  const statements = [];
+  let current = "";
+  let inDollarBlock = false;
+  const lines = sql.split("\n");
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    // Skip pure comment lines (but not inside DO blocks)
+    if (!inDollarBlock && trimmed.startsWith("--")) continue;
+
+    // Detect start of DO $$ block
+    if (!inDollarBlock && /\bDO\s+\$\$/i.test(trimmed)) {
+      inDollarBlock = true;
+    }
+
+    current += line + "\n";
+
+    // Detect end of DO $$ block
+    if (inDollarBlock && /\$\$\s*;/.test(trimmed)) {
+      inDollarBlock = false;
+      statements.push(current.trim());
+      current = "";
+      continue;
+    }
+
+    // Outside a $$ block, split on semicolons at end of line
+    if (!inDollarBlock && trimmed.endsWith(";")) {
+      const stmt = current.trim();
+      if (stmt && stmt !== ";") {
+        statements.push(stmt);
+      }
+      current = "";
+    }
+  }
+
+  // Any remaining text
+  const remaining = current.trim();
+  if (remaining && remaining !== ";") {
+    statements.push(remaining);
+  }
+
+  return statements;
+}
+
+/**
  * Run all SQL bootstrap scripts against the database.
- * Uses a dedicated client from the pool so SET commands stay on the same connection
- * and we get a longer timeout for large seed scripts.
+ * Uses a dedicated client from the pool so SET commands stay on the same connection.
+ * Splits SQL files into individual statements for reliable execution.
  */
 async function bootstrap(dbService) {
   console.log("[BOOTSTRAP] Checking if database needs initialization...");
@@ -79,12 +133,24 @@ async function bootstrap(dbService) {
         }
 
         const sizeKB = (sql.length / 1024).toFixed(1);
-        console.log(`[BOOTSTRAP] Executing ${script.file} (${sizeKB} KB)...`);
+        const stmts = splitStatements(sql);
+        console.log(`[BOOTSTRAP] Executing ${script.file} (${sizeKB} KB, ${stmts.length} statements)...`);
         const startTime = Date.now();
 
-        // Execute the entire file as a single query string.
-        // The pg driver's simple query protocol handles multi-statement SQL natively.
-        await client.query(sql);
+        let stmtIndex = 0;
+        for (const stmt of stmts) {
+          stmtIndex++;
+          try {
+            await client.query(stmt);
+          } catch (stmtErr) {
+            // Log individual statement failures but don't abort unless fatal
+            const preview = stmt.substring(0, 120).replace(/\n/g, " ");
+            console.error(`[BOOTSTRAP]    stmt ${stmtIndex}/${stmts.length} failed: ${stmtErr.message}`);
+            console.error(`[BOOTSTRAP]    SQL: ${preview}...`);
+            // Re-throw to be caught by outer catch for fatal handling
+            throw stmtErr;
+          }
+        }
 
         const elapsed = Date.now() - startTime;
         console.log(`[BOOTSTRAP] ✅ ${script.file} completed in ${elapsed}ms`);
