@@ -49,6 +49,7 @@ jobs:
             server.js
             admin/
             agentsRoutes.js
+            absRoutes.js
             datasetRoutes.js
             dashboardRoutes.js
             reportRoutes.js
