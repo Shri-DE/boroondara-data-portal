@@ -211,4 +211,121 @@ async function bootstrap(dbService) {
   return { bootstrapped: true, message: "Bootstrap complete", results };
 }
 
-module.exports = { bootstrap, needsBootstrap };
+/**
+ * Reset all data and re-seed from scratch.
+ * Truncates all data tables (preserving DDL) then re-runs seed scripts.
+ * Used when seed data has changed (e.g. council name change).
+ */
+async function resetAndReseed(dbService) {
+  console.log("[BOOTSTRAP] Resetting all data for re-seed...");
+
+  const pool = pgService.getPool();
+  const client = await pool.connect();
+  const results = [];
+
+  try {
+    await client.query(`SET statement_timeout = '300s'`);
+
+    // Truncate all data tables in dependency order (children first)
+    // Using CASCADE to handle foreign key constraints
+    const truncateSQL = `
+      TRUNCATE TABLE
+        spatial_features,
+        spatial_layers,
+        facility_bookings,
+        waste_collection_routes,
+        meeting_resolutions,
+        council_meetings,
+        permit_inspections,
+        planning_permits,
+        service_requests,
+        payroll_cost_distributions,
+        payroll_runs,
+        project_expenditures,
+        projects,
+        asset_maintenance,
+        assets,
+        receipt_applications,
+        receipts,
+        ar_invoice_lines,
+        ar_invoices,
+        journal_lines,
+        journal_headers,
+        budget_lines,
+        gl_balances,
+        ap_invoice_lines,
+        ap_invoices,
+        employees,
+        customers,
+        suppliers,
+        accounting_periods,
+        chart_of_accounts,
+        organizational_units,
+        councils
+      CASCADE;
+    `;
+
+    try {
+      await client.query(truncateSQL);
+      console.log("[BOOTSTRAP] ✅ All tables truncated.");
+      results.push({ step: "truncate", status: "ok" });
+    } catch (err) {
+      console.error("[BOOTSTRAP] ❌ Truncate failed:", err.message);
+      // Try truncating tables one by one, skipping missing ones
+      const tables = truncateSQL.match(/\w+/g).filter(t => t !== 'TRUNCATE' && t !== 'TABLE' && t !== 'CASCADE');
+      for (const table of tables) {
+        try {
+          await client.query(`TRUNCATE TABLE ${table} CASCADE`);
+        } catch (tErr) {
+          console.warn(`[BOOTSTRAP]    Skipping ${table}: ${tErr.message}`);
+        }
+      }
+      results.push({ step: "truncate", status: "ok-partial" });
+    }
+
+    // Now run all seed scripts (council + seed + spatial)
+    const seedScripts = SQL_SCRIPTS.filter(s => !s.ddl);
+    for (const script of seedScripts) {
+      const filePath = path.join(SQL_DIR, script.file);
+      try {
+        const sql = await fs.readFile(filePath, "utf-8");
+        if (!sql.trim()) continue;
+
+        const stmts = splitStatements(sql);
+        console.log(`[BOOTSTRAP] Executing ${script.file} (${stmts.length} statements)...`);
+        const startTime = Date.now();
+
+        let stmtIndex = 0;
+        for (const stmt of stmts) {
+          stmtIndex++;
+          try {
+            await client.query(stmt);
+          } catch (stmtErr) {
+            const preview = stmt.substring(0, 120).replace(/\n/g, " ");
+            console.error(`[BOOTSTRAP]    stmt ${stmtIndex}/${stmts.length} failed: ${stmtErr.message}`);
+            console.error(`[BOOTSTRAP]    SQL: ${preview}...`);
+            throw stmtErr;
+          }
+        }
+
+        const elapsed = Date.now() - startTime;
+        console.log(`[BOOTSTRAP] ✅ ${script.file} completed in ${elapsed}ms`);
+        results.push({ file: script.file, status: "ok", elapsed });
+      } catch (err) {
+        console.error(`[BOOTSTRAP] ❌ ${script.file} failed:`, err.message);
+        results.push({ file: script.file, status: "error", error: err.message });
+        if (script.fatal) {
+          return { reset: true, success: false, message: `${script.file} failed`, results };
+        }
+      }
+    }
+  } finally {
+    try { await client.query(`SET statement_timeout = '30s'`); } catch {}
+    client.release();
+  }
+
+  console.log("[BOOTSTRAP] ✅ Reset and re-seed complete.");
+  return { reset: true, success: true, message: "Reset and re-seed complete", results };
+}
+
+module.exports = { bootstrap, needsBootstrap, resetAndReseed };

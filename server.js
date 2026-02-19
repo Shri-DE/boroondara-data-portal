@@ -213,10 +213,16 @@ app.get("/api/health", async (req, res) => {
 });
 
 // Seed endpoint — run bootstrap on demand and return detailed results
+// Use ?reset=true to truncate all data and re-seed from scratch
 app.get("/api/seed", async (req, res) => {
   try {
-    const { bootstrap } = require("./services/dbBootstrap");
-    const result = await bootstrap(dbService);
+    const { bootstrap, resetAndReseed } = require("./services/dbBootstrap");
+    let result;
+    if (req.query.reset === "true") {
+      result = await resetAndReseed(dbService);
+    } else {
+      result = await bootstrap(dbService);
+    }
     // Also get table row counts for verification
     const counts = {};
     try {

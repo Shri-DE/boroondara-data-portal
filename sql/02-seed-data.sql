@@ -35,36 +35,36 @@ INSERT INTO asset_locations (code, name, address, suburb, council_area, latitude
 SELECT v.code, v.name, v.address, v.suburb, v.council_area, v.latitude, v.longitude,
        (SELECT council_id FROM councils LIMIT 1)
 FROM (VALUES
-  ('LOC-DONC',  'Doncaster Hill Precinct',        '150 Civic Dr',            'Doncaster',          'Manningham', -37.7847000, 145.1264000),
-  ('LOC-TMPL',  'Templestowe Village',             '30 Anderson St',          'Templestowe',        'Manningham', -37.7560000, 145.1170000),
-  ('LOC-BULL',  'Bulleen Park',                    '55 Bulleen Rd',           'Bulleen',            'Manningham', -37.7680000, 145.0830000),
-  ('LOC-WARR',  'Warrandyte River Reserve',        '10 Yarra St',             'Warrandyte',         'Manningham', -37.7530000, 145.2260000),
-  ('LOC-DNEL',  'Doncaster East Reserve',          '80 George St',            'Doncaster East',     'Manningham', -37.7870000, 145.1560000),
-  ('LOC-DSHP',  'Westfield Doncaster Surrounds',   '619 Doncaster Rd',       'Doncaster',          'Manningham', -37.7850000, 145.1250000),
-  ('LOC-PARK',  'Ruffey Lake Park',                'Victoria St',             'Doncaster',          'Manningham', -37.7720000, 145.1190000),
-  ('LOC-CIVIC', 'Manningham Civic Centre',         '699 Doncaster Rd',       'Doncaster',          'Manningham', -37.7830000, 145.1230000),
-  ('LOC-AQUA',  'Aquarena Aquatic Centre',         '25 Williamsons Rd',      'Doncaster',          'Manningham', -37.7780000, 145.1280000),
-  ('LOC-MCLB',  'MC Square Library',               '687 Doncaster Rd',       'Doncaster',          'Manningham', -37.7832000, 145.1228000),
-  ('LOC-PTPS',  'Petty''s Orchard Reserve',        'Knees Rd',               'Park Orchards',      'Manningham', -37.7680000, 145.1850000),
-  ('LOC-WDEP',  'Warrandyte Depot',                '5 Research-Warr Rd',     'Warrandyte',         'Manningham', -37.7510000, 145.2230000),
-  ('LOC-PINE',  'Pines Activity Centre',           '80 Reynolds Rd',         'Doncaster East',     'Manningham', -37.7900000, 145.1520000),
-  ('LOC-DONV',  'Donvale Sports Hub',              '20 Mitcham Rd',          'Donvale',            'Manningham', -37.7970000, 145.1700000),
-  ('LOC-LTMP',  'Lower Templestowe Reserve',       '25 Blake St',            'Lower Templestowe',  'Manningham', -37.7640000, 145.1050000),
-  ('LOC-SRDG',  'Serpells Rd Reserve',             '10 Serpells Rd',          'Templestowe',        'Manningham', -37.7500000, 145.1320000),
-  ('LOC-YVAL',  'Yarra Valley Parklands',          'Everard Dr',             'Templestowe',        'Manningham', -37.7610000, 145.1400000),
-  ('LOC-TBIK',  'Templestowe Bike Track',          'Porter St',              'Templestowe',        'Manningham', -37.7545000, 145.1285000),
-  ('LOC-DCRK',  'Deep Creek Reserve',              'Stintons Rd',            'Park Orchards',      'Manningham', -37.7620000, 145.1920000),
-  ('LOC-SCHM',  'Schramms Reserve',                'Heidelberg-Warr Rd',     'Doncaster',          'Manningham', -37.7710000, 145.1100000),
-  ('LOC-JUMP',  'Jumping Creek Reserve',           'Jumping Creek Rd',       'Wonga Park',         'Manningham', -37.7490000, 145.2530000),
-  ('LOC-WPARK', 'Wonga Park Village',              '22 Old Yarra Rd',        'Wonga Park',         'Manningham', -37.7430000, 145.2580000),
-  ('LOC-RIESH', 'Rieschiecks Reserve',             'Thompson St',            'Templestowe',        'Manningham', -37.7490000, 145.1370000),
-  ('LOC-ZERB',  'Zerbes Reserve',                  'Zerbes Way',             'Doncaster',          'Manningham', -37.7770000, 145.1360000),
-  ('LOC-TULL',  'Tulloch Reserve',                 'Tulloch Gv',             'Templestowe Lower',  'Manningham', -37.7650000, 145.1000000),
-  ('LOC-MULN',  'Mullum Mullum Linear Park',       'Springvale Rd',          'Donvale',            'Manningham', -37.8000000, 145.1650000),
-  ('LOC-KOOD',  'Koonung Creek Reserve',           'Koonung Creek',          'Doncaster',          'Manningham', -37.7860000, 145.1090000),
-  ('LOC-CURW',  'Currawong Bush Park',             'Reynolds Rd',            'Doncaster East',     'Manningham', -37.7920000, 145.1610000),
-  ('LOC-BIRR',  'Birrarung Park',                  'Fitzsimons Ln',          'Templestowe',        'Manningham', -37.7580000, 145.1120000),
-  ('LOC-WDRD',  'Woodridge Linear Reserve',        'Woodridge Dr',           'Doncaster East',     'Manningham', -37.7890000, 145.1640000)
+  ('LOC-CAMB',  'Camberwell Civic Centre',         '8 Inglesby Rd',           'Camberwell',         'Boroondara', -37.8400000, 145.0570000),
+  ('LOC-HAWT',  'Hawthorn Arts Centre',             '360 Burwood Rd',          'Hawthorn',           'Boroondara', -37.8220000, 145.0350000),
+  ('LOC-KEWC',  'Kew Civic Centre',                 '30 Cotham Rd',            'Kew',                'Boroondara', -37.8070000, 145.0290000),
+  ('LOC-GLEN',  'Glen Iris Wetlands',               '25 High St',              'Glen Iris',          'Boroondara', -37.8610000, 145.0650000),
+  ('LOC-SURY',  'Surrey Hills Neighbourhood Centre','157 Union Rd',            'Surrey Hills',       'Boroondara', -37.8260000, 145.1010000),
+  ('LOC-BALW',  'Balwyn Community Centre',           '412 Whitehorse Rd',      'Balwyn',             'Boroondara', -37.8110000, 145.0770000),
+  ('LOC-CANT',  'Canterbury Gardens',                'Canterbury Rd',           'Canterbury',         'Boroondara', -37.8270000, 145.0790000),
+  ('LOC-BPOL',  'Boroondara Sports Complex',         '40 Reservior Rd',        'Balwyn North',       'Boroondara', -37.7930000, 145.0870000),
+  ('LOC-GARD',  'Gardiner Park',                     'Gardiner Pde',           'Glen Iris',          'Boroondara', -37.8560000, 145.0520000),
+  ('LOC-HAWL',  'Hawthorn Library',                  '584 Glenferrie Rd',      'Hawthorn',           'Boroondara', -37.8280000, 145.0370000),
+  ('LOC-DEEP',  'Deepdene Park',                     '25 Whitehorse Rd',       'Deepdene',           'Boroondara', -37.8120000, 145.0570000),
+  ('LOC-KEWD',  'Kew Depot',                         '5 Normanby Rd',          'Kew',                'Boroondara', -37.8010000, 145.0250000),
+  ('LOC-ASHB',  'Ashburton Pool & Recreation',       '12 Warner Ave',          'Ashburton',          'Boroondara', -37.8650000, 145.0800000),
+  ('LOC-CAMR',  'Camberwell Sports Ground',          '60 Prospect Hill Rd',    'Camberwell',         'Boroondara', -37.8430000, 145.0660000),
+  ('LOC-KEWR',  'Kew Recreation Centre',             '175 Barkers Rd',         'Kew',                'Boroondara', -37.8050000, 145.0380000),
+  ('LOC-BALP',  'Balwyn Park',                       '1 Balwyn Rd',            'Balwyn',             'Boroondara', -37.8130000, 145.0830000),
+  ('LOC-BURK',  'Burke Rd Precinct',                 'Burke Rd',               'Camberwell',         'Boroondara', -37.8350000, 145.0590000),
+  ('LOC-RIVD',  'Riversdale Reserve',                'Riversdale Rd',          'Hawthorn East',      'Boroondara', -37.8340000, 145.0470000),
+  ('LOC-LYNR',  'Lynden Park Reserve',               'Burke Rd',               'Camberwell',         'Boroondara', -37.8480000, 145.0590000),
+  ('LOC-MARL',  'Maranoa Gardens',                   'Beckett Park Rd',        'Balwyn',             'Boroondara', -37.8090000, 145.0910000),
+  ('LOC-COTT',  'Cotham Rd Reserve',                 'Cotham Rd',              'Kew',                'Boroondara', -37.8060000, 145.0340000),
+  ('LOC-GLFT',  'Glenferrie Oval',                   'Glenferrie Rd',          'Hawthorn',           'Boroondara', -37.8260000, 145.0380000),
+  ('LOC-VICTG', 'Victoria Park',                     'High St',                'Kew',                'Boroondara', -37.8000000, 145.0200000),
+  ('LOC-FREY',  'Freeway Golf Course',               'Yarra Blvd',             'Kew',                'Boroondara', -37.7960000, 145.0160000),
+  ('LOC-GARV',  'Garvin Park',                       'Garvin St',              'Balwyn North',       'Boroondara', -37.7950000, 145.0900000),
+  ('LOC-LEAD',  'Lead Street Reserve',               'Lead St',                'Balwyn',             'Boroondara', -37.8080000, 145.0740000),
+  ('LOC-WATT',  'Wattle Park',                       'Riversdale Rd',          'Surrey Hills',       'Boroondara', -37.8310000, 145.1050000),
+  ('LOC-READ',  'Read Gardens',                      'Mont Albert Rd',         'Canterbury',         'Boroondara', -37.8200000, 145.0820000),
+  ('LOC-PEEL',  'Peel St Reserve',                   'Peel St',                'Kew',                'Boroondara', -37.8020000, 145.0300000),
+  ('LOC-BEAU',  'Beaumont Reserve',                  'Beaumont Pde',           'Camberwell',         'Boroondara', -37.8450000, 145.0700000)
 ) AS v(code, name, address, suburb, council_area, latitude, longitude)
 WHERE NOT EXISTS (SELECT 1 FROM asset_locations LIMIT 1);
 
@@ -148,15 +148,15 @@ DECLARE
                                   'Governance & Legal','Human Resources','Communications',
                                   'Asset Management','Waste Services','Youth & Family Services'];
 
-    v_suburbs TEXT[] := ARRAY['Doncaster','Templestowe','Bulleen','Warrandyte','Doncaster East',
-                              'Donvale','Park Orchards','Wonga Park','Lower Templestowe',
-                              'Templestowe Lower'];
+    v_suburbs TEXT[] := ARRAY['Hawthorn','Camberwell','Kew','Balwyn','Canterbury',
+                              'Glen Iris','Surrey Hills','Hawthorn East','Balwyn North',
+                              'Deepdene'];
 
-    v_streets TEXT[] := ARRAY['Civic Dr','Anderson St','Bulleen Rd','Yarra St','George St',
-                              'Doncaster Rd','Victoria St','Williamsons Rd','Reynolds Rd',
-                              'Mitcham Rd','Tram Rd','High St','King St','Parker St',
-                              'Blackburn Rd','Springvale Rd','Manningham Rd','Thompsons Rd',
-                              'Elgar Rd','Fitzsimons Ln'];
+    v_streets TEXT[] := ARRAY['Glenferrie Rd','Burke Rd','Riversdale Rd','Cotham Rd','Camberwell Rd',
+                              'Toorak Rd','Auburn Rd','Power St','Prospect Hill Rd',
+                              'Canterbury Rd','Station St','High St','Church St','Victoria Rd',
+                              'Barkers Rd','Studley Park Rd','Denmark St','Mont Albert Rd',
+                              'Whitehorse Rd','Boulevard'];
 
 BEGIN
     -- Get the existing council
@@ -338,26 +338,26 @@ BEGIN
         INSERT INTO customers (council_id, customer_code, customer_name, abn, customer_type, is_active)
         SELECT v_council_id, v.code, v.name, v.abn, v.ctype, TRUE
         FROM (VALUES
-            ('CUST006','Westfield Doncaster',         '50 008 700 100','Commercial'),
-            ('CUST007','Manningham YMCA',             '14 001 283 726','Community'),
-            ('CUST008','Doncaster RSL',               '72 004 201 955','Community'),
-            ('CUST009','Templestowe Valley PS',       '11 222 333 444','Education'),
-            ('CUST010','Doncaster Secondary College', '22 333 444 555','Education'),
-            ('CUST011','Manningham Uniting Church',   '33 444 555 666','Community'),
-            ('CUST012','Bulleen Lions FC',            '44 555 666 777','Sports Club'),
-            ('CUST013','Warrandyte Cricket Club',     '55 666 777 888','Sports Club'),
-            ('CUST014','Eastern Health',              '68 286 158 036','Health'),
-            ('CUST015','Donvale Bowls Club',          '66 777 888 999','Sports Club'),
-            ('CUST016','Manningham Business Network', '77 888 999 000','Business'),
-            ('CUST017','Templestowe Tennis Club',     '88 999 000 111','Sports Club'),
-            ('CUST018','Manningham Art Gallery',      '99 000 111 222','Community'),
-            ('CUST019','Warrandyte Community Bank',   '18 064 741 295','Business'),
-            ('CUST020','Park Orchards Community House','10 111 222 333','Community'),
-            ('CUST021','Doncaster East Scouts',       '11 112 223 334','Community'),
-            ('CUST022','Bulleen Art & Garden',        '22 223 334 445','Business'),
-            ('CUST023','Tunstall Square Traders',     '33 334 445 556','Business'),
-            ('CUST024','Manningham Toy Library',      '44 445 556 667','Community'),
-            ('CUST025','Rieschiecks Pavilion Trust',  '55 556 667 778','Community')
+            ('CUST006','Camberwell Fresh Food Market',  '50 008 700 100','Commercial'),
+            ('CUST007','Boroondara YMCA',             '14 001 283 726','Community'),
+            ('CUST008','Hawthorn RSL',                '72 004 201 955','Community'),
+            ('CUST009','Canterbury Primary School',   '11 222 333 444','Education'),
+            ('CUST010','Camberwell High School',      '22 333 444 555','Education'),
+            ('CUST011','Kew Uniting Church',          '33 444 555 666','Community'),
+            ('CUST012','Hawthorn FC',                 '44 555 666 777','Sports Club'),
+            ('CUST013','Kew Cricket Club',            '55 666 777 888','Sports Club'),
+            ('CUST014','St Vincents Hospital',        '68 286 158 036','Health'),
+            ('CUST015','Hawthorn Bowling Club',       '66 777 888 999','Sports Club'),
+            ('CUST016','Boroondara Business Network', '77 888 999 000','Business'),
+            ('CUST017','Balwyn Tennis Club',          '88 999 000 111','Sports Club'),
+            ('CUST018','Hawthorn Arts Centre Trust',  '99 000 111 222','Community'),
+            ('CUST019','Camberwell Traders Assn',     '18 064 741 295','Business'),
+            ('CUST020','Surrey Hills Neighbourhood Centre','10 111 222 333','Community'),
+            ('CUST021','Kew Scouts',                  '11 112 223 334','Community'),
+            ('CUST022','Balwyn Cinema',               '22 223 334 445','Business'),
+            ('CUST023','Glenferrie Rd Traders',       '33 334 445 556','Business'),
+            ('CUST024','Boroondara Toy Library',      '44 445 556 667','Community'),
+            ('CUST025','Canterbury Sports Ground Trust','55 556 667 778','Community')
         ) AS v(code, name, abn, ctype)
         WHERE NOT EXISTS (SELECT 1 FROM customers WHERE customer_code = v.code AND council_id = v_council_id);
     END IF;
@@ -373,16 +373,16 @@ BEGIN
                v.budget, v.actual, v.committed, v.status, v.sdate::DATE, v.cdate::DATE, v.manager
         FROM (VALUES
             ('PRJ005','Road Renewal Program 2025',        'Capital', 4500000, 1200000, 2800000,'Active',     '2024-07-01','2025-06-30','David Chen'),
-            ('PRJ006','Aquarena Redevelopment Stage 2',   'Capital',12000000, 3500000, 7200000,'Active',     '2024-01-15','2026-06-30','Sarah Mitchell'),
+            ('PRJ006','Ashburton Pool Redevelopment',      'Capital',12000000, 3500000, 7200000,'Active',     '2024-01-15','2026-06-30','Sarah Mitchell'),
             ('PRJ007','LED Street Lighting Upgrade',      'Capital', 2800000, 2100000,  500000,'Active',     '2023-10-01','2025-03-31','Mark Thompson'),
             ('PRJ008','Bridge Strengthening - Yarra',     'Capital', 1800000,  450000, 1100000,'Active',     '2024-03-01','2025-09-30','Andrew White'),
-            ('PRJ009','Ruffey Lake Park Masterplan',      'Capital', 6000000,  800000, 3500000,'Active',     '2024-06-01','2027-12-31','Nicole Taylor'),
+            ('PRJ009','Victoria Park Masterplan',           'Capital', 6000000,  800000, 3500000,'Active',     '2024-06-01','2027-12-31','Nicole Taylor'),
             ('PRJ010','Civic Centre Solar Installation',  'Capital',  950000,  920000,       0,'Completed',  '2023-07-01','2024-06-15','James Roberts'),
-            ('PRJ011','Drainage Upgrade - Bulleen',       'Capital', 3200000,  600000, 2200000,'Active',     '2024-09-01','2025-12-31','Peter Evans'),
+            ('PRJ011','Drainage Upgrade - Gardiners Creek','Capital', 3200000,  600000, 2200000,'Active',     '2024-09-01','2025-12-31','Peter Evans'),
             ('PRJ012','Community Safety CCTV Program',    'Capital',  750000,  300000,  350000,'Active',     '2024-04-01','2025-06-30','Rachel Green'),
             ('PRJ013','Shared Path Network Extension',    'Capital', 2100000,  150000, 1600000,'Active',     '2024-11-01','2026-03-31','Luke Anderson'),
             ('PRJ014','Library Digital Transformation',   'Operating',450000,  380000,   50000,'Active',     '2024-01-01','2025-06-30','Emma Collins'),
-            ('PRJ015','Warrandyte Streetscape Renewal',   'Capital', 1500000,   50000, 1200000,'Planning',   '2025-01-01','2026-06-30','Daniel Harris')
+            ('PRJ015','Glenferrie Rd Streetscape Renewal', 'Capital', 1500000,   50000, 1200000,'Planning',   '2025-01-01','2026-06-30','Daniel Harris')
         ) AS v(code, name, ptype, budget, actual, committed, status, sdate, cdate, manager)
         WHERE NOT EXISTS (SELECT 1 FROM projects WHERE project_code = v.code AND council_id = v_council_id);
     END IF;
@@ -417,7 +417,7 @@ BEGIN
                    v_first_names[1 + (i % array_length(v_first_names,1))],
                    v_last_names[1 + ((i * 7) % array_length(v_last_names,1))],
                    LOWER(v_first_names[1 + (i % array_length(v_first_names,1))]) || '.' ||
-                   LOWER(v_last_names[1 + ((i * 7) % array_length(v_last_names,1))]) || '@manningham.vic.gov.au',
+                   LOWER(v_last_names[1 + ((i * 7) % array_length(v_last_names,1))]) || '@boroondara.vic.gov.au',
                    v_departments[1 + (i % array_length(v_departments,1))],
                    CASE (i % 10)
                        WHEN 0 THEN 'Director'
@@ -1012,9 +1012,9 @@ BEGIN
                 DATE '2024-01-23' + ((i - 1) * 21),
                 '19:00'::TIME,
                 CASE WHEN i % 3 = 1 THEN '20:30'::TIME ELSE '21:30'::TIME END,
-                'Manningham Civic Centre, Council Chamber',
+                'Camberwell Civic Centre, Council Chamber',
                 CASE WHEN i <= 16 THEN 'Completed' ELSE 'Scheduled' END,
-                CASE WHEN i <= 16 THEN 'https://www.manningham.vic.gov.au/minutes/' || i ELSE NULL END
+                CASE WHEN i <= 16 THEN 'https://www.boroondara.vic.gov.au/minutes/' || i ELSE NULL END
             );
         END LOOP;
     END IF;
@@ -1161,26 +1161,26 @@ BEGIN
         INSERT INTO waste_collection_routes (council_id, route_code, route_name, waste_type, collection_day, frequency, suburb_coverage, households, contractor)
         SELECT v_council_id, v.code, v.name, v.wtype, v.day, v.freq, v.suburbs, v.hh, v.contractor
         FROM (VALUES
-            ('WR-001','Doncaster General Mon',      'General Waste','Monday',   'Weekly',    'Doncaster, Doncaster Hill',  2800,'Cleanaway Waste Management'),
-            ('WR-002','Doncaster Recycling Mon',     'Recycling',    'Monday',   'Fortnightly','Doncaster, Doncaster Hill',2800,'Cleanaway Waste Management'),
-            ('WR-003','Doncaster Green Mon',         'Green Waste',  'Monday',   'Fortnightly','Doncaster, Doncaster Hill',2800,'Cleanaway Waste Management'),
-            ('WR-004','Templestowe General Tue',     'General Waste','Tuesday',  'Weekly',    'Templestowe, Lower Templestowe',3200,'Cleanaway Waste Management'),
-            ('WR-005','Templestowe Recycling Tue',   'Recycling',    'Tuesday',  'Fortnightly','Templestowe, Lower Templestowe',3200,'Cleanaway Waste Management'),
-            ('WR-006','Templestowe Green Tue',       'Green Waste',  'Tuesday',  'Fortnightly','Templestowe, Lower Templestowe',3200,'Cleanaway Waste Management'),
-            ('WR-007','Bulleen General Wed',         'General Waste','Wednesday','Weekly',    'Bulleen',                    1800,'Cleanaway Waste Management'),
-            ('WR-008','Bulleen Recycling Wed',       'Recycling',    'Wednesday','Fortnightly','Bulleen',                   1800,'Cleanaway Waste Management'),
-            ('WR-009','Bulleen Green Wed',           'Green Waste',  'Wednesday','Fortnightly','Bulleen',                   1800,'Cleanaway Waste Management'),
-            ('WR-010','Warrandyte General Thu',      'General Waste','Thursday', 'Weekly',    'Warrandyte, Wonga Park',     2100,'Veolia Australia'),
-            ('WR-011','Warrandyte Recycling Thu',    'Recycling',    'Thursday', 'Fortnightly','Warrandyte, Wonga Park',    2100,'Veolia Australia'),
-            ('WR-012','Warrandyte Green Thu',        'Green Waste',  'Thursday', 'Fortnightly','Warrandyte, Wonga Park',    2100,'Veolia Australia'),
-            ('WR-013','Doncaster East General Fri',  'General Waste','Friday',   'Weekly',    'Doncaster East, Donvale',    2600,'Cleanaway Waste Management'),
-            ('WR-014','Doncaster East Recycling Fri','Recycling',    'Friday',   'Fortnightly','Doncaster East, Donvale',   2600,'Cleanaway Waste Management'),
-            ('WR-015','Doncaster East Green Fri',    'Green Waste',  'Friday',   'Fortnightly','Doncaster East, Donvale',   2600,'Cleanaway Waste Management'),
-            ('WR-016','Park Orchards General Mon',   'General Waste','Monday',   'Weekly',    'Park Orchards',              1200,'Veolia Australia'),
-            ('WR-017','Park Orchards Recycling Mon', 'Recycling',    'Monday',   'Fortnightly','Park Orchards',             1200,'Veolia Australia'),
-            ('WR-018','Park Orchards Green Mon',     'Green Waste',  'Monday',   'Fortnightly','Park Orchards',             1200,'Veolia Australia'),
-            ('WR-019','Hard Waste - North Zone',     'Hard Waste',   'Booked',   'On Request','All northern suburbs',       8500,'Cleanaway Waste Management'),
-            ('WR-020','Hard Waste - South Zone',     'Hard Waste',   'Booked',   'On Request','All southern suburbs',       9000,'Cleanaway Waste Management')
+            ('WR-001','Hawthorn General Mon',        'General Waste','Monday',   'Weekly',    'Hawthorn, Hawthorn East',     2800,'Cleanaway Waste Management'),
+            ('WR-002','Hawthorn Recycling Mon',       'Recycling',    'Monday',   'Fortnightly','Hawthorn, Hawthorn East',  2800,'Cleanaway Waste Management'),
+            ('WR-003','Hawthorn Green Mon',           'Green Waste',  'Monday',   'Fortnightly','Hawthorn, Hawthorn East',  2800,'Cleanaway Waste Management'),
+            ('WR-004','Camberwell General Tue',       'General Waste','Tuesday',  'Weekly',    'Camberwell, Canterbury',      3200,'Cleanaway Waste Management'),
+            ('WR-005','Camberwell Recycling Tue',     'Recycling',    'Tuesday',  'Fortnightly','Camberwell, Canterbury',    3200,'Cleanaway Waste Management'),
+            ('WR-006','Camberwell Green Tue',         'Green Waste',  'Tuesday',  'Fortnightly','Camberwell, Canterbury',    3200,'Cleanaway Waste Management'),
+            ('WR-007','Kew General Wed',              'General Waste','Wednesday','Weekly',    'Kew, Deepdene',              1800,'Cleanaway Waste Management'),
+            ('WR-008','Kew Recycling Wed',            'Recycling',    'Wednesday','Fortnightly','Kew, Deepdene',             1800,'Cleanaway Waste Management'),
+            ('WR-009','Kew Green Wed',                'Green Waste',  'Wednesday','Fortnightly','Kew, Deepdene',             1800,'Cleanaway Waste Management'),
+            ('WR-010','Balwyn General Thu',           'General Waste','Thursday', 'Weekly',    'Balwyn, Balwyn North',       2100,'Cleanaway Waste Management'),
+            ('WR-011','Balwyn Recycling Thu',         'Recycling',    'Thursday', 'Fortnightly','Balwyn, Balwyn North',      2100,'Cleanaway Waste Management'),
+            ('WR-012','Balwyn Green Thu',             'Green Waste',  'Thursday', 'Fortnightly','Balwyn, Balwyn North',      2100,'Cleanaway Waste Management'),
+            ('WR-013','Glen Iris General Fri',        'General Waste','Friday',   'Weekly',    'Glen Iris, Ashburton',        2600,'Cleanaway Waste Management'),
+            ('WR-014','Glen Iris Recycling Fri',      'Recycling',    'Friday',   'Fortnightly','Glen Iris, Ashburton',      2600,'Cleanaway Waste Management'),
+            ('WR-015','Glen Iris Green Fri',          'Green Waste',  'Friday',   'Fortnightly','Glen Iris, Ashburton',      2600,'Cleanaway Waste Management'),
+            ('WR-016','Surrey Hills General Mon',     'General Waste','Monday',   'Weekly',    'Surrey Hills, Mont Albert',   1200,'Cleanaway Waste Management'),
+            ('WR-017','Surrey Hills Recycling Mon',   'Recycling',    'Monday',   'Fortnightly','Surrey Hills, Mont Albert', 1200,'Cleanaway Waste Management'),
+            ('WR-018','Surrey Hills Green Mon',       'Green Waste',  'Monday',   'Fortnightly','Surrey Hills, Mont Albert', 1200,'Cleanaway Waste Management'),
+            ('WR-019','Hard Waste - North Zone',      'Hard Waste',   'Booked',   'On Request','All northern suburbs',       8500,'Cleanaway Waste Management'),
+            ('WR-020','Hard Waste - South Zone',      'Hard Waste',   'Booked',   'On Request','All southern suburbs',       9000,'Cleanaway Waste Management')
         ) AS v(code, name, wtype, day, freq, suburbs, hh, contractor)
         WHERE NOT EXISTS (SELECT 1 FROM waste_collection_routes WHERE council_id = v_council_id LIMIT 1);
     END IF;
@@ -1194,14 +1194,14 @@ BEGIN
             INSERT INTO facility_bookings (council_id, facility_name, booked_by, booking_date, start_time, end_time, purpose, attendees, status, fee_amount)
             SELECT v_council_id,
                    CASE (i % 8)
-                       WHEN 0 THEN 'Manningham Function Centre - Main Hall'
-                       WHEN 1 THEN 'Doncaster Community Hub - Room A'
-                       WHEN 2 THEN 'Templestowe Pavilion'
-                       WHEN 3 THEN 'Bulleen Community Hall'
-                       WHEN 4 THEN 'Warrandyte Community Centre'
-                       WHEN 5 THEN 'MC Square Meeting Room 1'
-                       WHEN 6 THEN 'Pines Activity Centre Hall'
-                       ELSE 'Donvale Reserve Pavilion'
+                       WHEN 0 THEN 'Camberwell Civic Centre - Main Hall'
+                       WHEN 1 THEN 'Hawthorn Arts Centre - Room A'
+                       WHEN 2 THEN 'Kew Civic Centre Pavilion'
+                       WHEN 3 THEN 'Canterbury Community Centre'
+                       WHEN 4 THEN 'Glen Iris Community Centre'
+                       WHEN 5 THEN 'Balwyn Library Meeting Room'
+                       WHEN 6 THEN 'Surrey Hills Neighbourhood Centre'
+                       ELSE 'Ashburton Community Hub'
                    END,
                    v_first_names[1 + (i % array_length(v_first_names,1))] || ' ' || v_last_names[1 + ((i*3) % array_length(v_last_names,1))],
                    DATE '2024-06-01' + (random() * 300)::INT,
@@ -1222,14 +1222,14 @@ BEGIN
             WHERE NOT EXISTS (
                 SELECT 1 FROM facility_bookings fb WHERE fb.council_id = v_council_id AND fb.facility_name = (
                     CASE (i % 8)
-                       WHEN 0 THEN 'Manningham Function Centre - Main Hall'
-                       WHEN 1 THEN 'Doncaster Community Hub - Room A'
-                       WHEN 2 THEN 'Templestowe Pavilion'
-                       WHEN 3 THEN 'Bulleen Community Hall'
-                       WHEN 4 THEN 'Warrandyte Community Centre'
-                       WHEN 5 THEN 'MC Square Meeting Room 1'
-                       WHEN 6 THEN 'Pines Activity Centre Hall'
-                       ELSE 'Donvale Reserve Pavilion'
+                       WHEN 0 THEN 'Camberwell Civic Centre - Main Hall'
+                       WHEN 1 THEN 'Hawthorn Arts Centre - Room A'
+                       WHEN 2 THEN 'Kew Civic Centre Pavilion'
+                       WHEN 3 THEN 'Canterbury Community Centre'
+                       WHEN 4 THEN 'Glen Iris Community Centre'
+                       WHEN 5 THEN 'Balwyn Library Meeting Room'
+                       WHEN 6 THEN 'Surrey Hills Neighbourhood Centre'
+                       ELSE 'Ashburton Community Hub'
                    END
                 ) AND fb.booking_date = DATE '2024-06-01' + (i * 3)
                 LIMIT 1
