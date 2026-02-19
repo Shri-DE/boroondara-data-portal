@@ -903,16 +903,18 @@ BEGIN
     SELECT COUNT(*) INTO v_count FROM payroll_cost_distributions;
     IF v_count < 100 THEN
         i := 0;
-        FOR v_id IN (SELECT pr.payroll_run_id FROM payroll_runs pr WHERE pr.council_id = v_council_id ORDER BY pr.payroll_run_number) LOOP
+        FOR v_id IN (SELECT pr.payroll_run_id FROM payroll_runs pr WHERE pr.council_id = v_council_id ORDER BY pr.run_code) LOOP
             FOR j IN 1..8 LOOP
                 i := i + 1;
                 IF i > 100 THEN EXIT; END IF;
                 SELECT o.org_unit_id INTO v_org_id FROM organizational_units o WHERE o.council_id = v_council_id ORDER BY random() LIMIT 1;
+                SELECT e.employee_id INTO v_employee_id FROM employees e
+                  WHERE e.employee_code = 'EMP' || LPAD(((i % 80) + 1)::TEXT, 4, '0') AND e.council_id = v_council_id LIMIT 1;
                 INSERT INTO payroll_cost_distributions (payroll_run_id, council_id, employee_id, employee_name, natural_account,
                                                          org_unit_id, amount, distribution_percentage)
                 VALUES (
                     v_id, v_council_id,
-                    'EMP' || LPAD(((i % 80) + 1)::TEXT, 4, '0'),
+                    v_employee_id,
                     v_first_names[1 + (i % array_length(v_first_names,1))] || ' ' || v_last_names[1 + ((i*3) % array_length(v_last_names,1))],
                     CASE (i % 3) WHEN 0 THEN '5110' WHEN 1 THEN '5120' ELSE '5130' END,
                     v_org_id,

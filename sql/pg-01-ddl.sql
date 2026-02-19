@@ -221,7 +221,10 @@ CREATE TABLE IF NOT EXISTS project_expenditures (
     amount            NUMERIC(14,2),
     expenditure_type  VARCHAR(40),
     description       TEXT,
-    supplier_id       UUID
+    supplier_id       UUID,
+    vendor_name       VARCHAR(200),
+    natural_account   VARCHAR(20),
+    org_unit_id       UUID
 );
 
 -- =========================
@@ -233,9 +236,12 @@ CREATE TABLE IF NOT EXISTS gl_balances (
     period_id        UUID,
     natural_account  VARCHAR(20),
     cost_centre      VARCHAR(20),
+    org_unit_id      UUID,
     begin_balance    NUMERIC(14,2) DEFAULT 0,
+    beginning_balance NUMERIC(14,2) DEFAULT 0,
     period_activity  NUMERIC(14,2) DEFAULT 0,
     end_balance      NUMERIC(14,2) DEFAULT 0,
+    ending_balance   NUMERIC(14,2) DEFAULT 0,
     ytd_activity     NUMERIC(14,2) DEFAULT 0,
     budget_amount    NUMERIC(14,2) DEFAULT 0
 );
@@ -247,6 +253,7 @@ CREATE TABLE IF NOT EXISTS budget_lines (
     budget_line_id  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     council_id      UUID REFERENCES councils(council_id),
     fiscal_year     VARCHAR(10),
+    period_id       UUID,
     natural_account VARCHAR(20),
     cost_centre     VARCHAR(20),
     org_unit_id     UUID,
@@ -286,7 +293,8 @@ CREATE TABLE IF NOT EXISTS ap_invoice_lines (
     amount         NUMERIC(14,2),
     tax_amount     NUMERIC(14,2) DEFAULT 0,
     natural_account VARCHAR(20),
-    cost_centre    VARCHAR(20)
+    cost_centre    VARCHAR(20),
+    org_unit_id    UUID
 );
 
 -- =========================
@@ -319,6 +327,7 @@ CREATE TABLE IF NOT EXISTS ar_invoices (
     tax_amount     NUMERIC(14,2) DEFAULT 0,
     total_amount   NUMERIC(14,2),
     paid_amount    NUMERIC(14,2) DEFAULT 0,
+    received_amount NUMERIC(14,2) DEFAULT 0,
     status         VARCHAR(30),
     description    TEXT
 );
@@ -334,6 +343,7 @@ CREATE TABLE IF NOT EXISTS receipts (
     receipt_date   DATE,
     receipt_amount NUMERIC(14,2),
     payment_method VARCHAR(30),
+    receipt_method VARCHAR(30),
     status         VARCHAR(30)
 );
 
@@ -344,7 +354,8 @@ CREATE TABLE IF NOT EXISTS receipt_applications (
     application_id  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     receipt_id      UUID NOT NULL REFERENCES receipts(receipt_id),
     ar_invoice_id   UUID,
-    applied_amount  NUMERIC(14,2)
+    applied_amount  NUMERIC(14,2),
+    application_date DATE
 );
 
 -- =========================
@@ -354,12 +365,16 @@ CREATE TABLE IF NOT EXISTS journal_headers (
     journal_header_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     council_id        UUID REFERENCES councils(council_id),
     journal_number    VARCHAR(30),
+    journal_name      VARCHAR(200),
     journal_date      DATE,
     period_id         UUID,
     description       TEXT,
     journal_source    VARCHAR(40),
+    accounting_date   DATE,
+    posting_date      DATE,
     status            VARCHAR(30),
     posted_by         VARCHAR(120),
+    created_by        VARCHAR(120),
     total_debit       NUMERIC(14,2) DEFAULT 0,
     total_credit      NUMERIC(14,2) DEFAULT 0
 );
@@ -370,11 +385,15 @@ CREATE TABLE IF NOT EXISTS journal_headers (
 CREATE TABLE IF NOT EXISTS journal_lines (
     journal_line_id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     journal_header_id UUID NOT NULL REFERENCES journal_headers(journal_header_id),
+    council_id        UUID REFERENCES councils(council_id),
     line_number       INT,
     natural_account   VARCHAR(20),
     cost_centre       VARCHAR(20),
+    org_unit_id       UUID,
     debit_amount      NUMERIC(14,2) DEFAULT 0,
     credit_amount     NUMERIC(14,2) DEFAULT 0,
+    net_amount        NUMERIC(14,2) DEFAULT 0,
+    currency_code     VARCHAR(10) DEFAULT 'AUD',
     description       TEXT
 );
 
@@ -403,11 +422,15 @@ CREATE TABLE IF NOT EXISTS payroll_runs (
 CREATE TABLE IF NOT EXISTS payroll_cost_distributions (
     distribution_id  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     payroll_run_id   UUID NOT NULL REFERENCES payroll_runs(payroll_run_id),
+    council_id       UUID REFERENCES councils(council_id),
     employee_id      UUID,
+    employee_name    VARCHAR(200),
     natural_account  VARCHAR(20),
     cost_centre      VARCHAR(20),
+    org_unit_id      UUID,
     amount           NUMERIC(14,2),
-    distribution_type VARCHAR(40)
+    distribution_type VARCHAR(40),
+    distribution_percentage NUMERIC(5,2)
 );
 
 -- =========================

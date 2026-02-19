@@ -15,11 +15,12 @@ const SQL_DIR = path.join(__dirname, "..", "sql");
 // Ordered list of SQL files to execute.
 // "fatal" means bootstrap aborts if that script fails.
 const SQL_SCRIPTS = [
-  { file: "pg-01-ddl.sql",          fatal: true  },  // core tables + pgcrypto
-  { file: "pg-02-spatial-ddl.sql",   fatal: false },  // PostGIS tables (non-fatal)
-  { file: "pg-00-council.sql",       fatal: true  },  // bootstrap council record
-  { file: "02-seed-data.sql",        fatal: false },  // comprehensive seed data
-  { file: "pg-03-spatial-seed.sql",  fatal: false },  // spatial layers + features
+  { file: "pg-01-ddl.sql",          fatal: true,  ddl: true },  // core tables + pgcrypto
+  { file: "pg-02-spatial-ddl.sql",   fatal: false, ddl: true },  // PostGIS tables (non-fatal)
+  { file: "pg-04-alter-columns.sql", fatal: false, ddl: true },  // add missing columns to existing tables
+  { file: "pg-00-council.sql",       fatal: true,  ddl: false }, // bootstrap council record
+  { file: "02-seed-data.sql",        fatal: false, ddl: false }, // comprehensive seed data
+  { file: "pg-03-spatial-seed.sql",  fatal: false, ddl: false }, // spatial layers + features
 ];
 
 /**
@@ -119,9 +120,9 @@ async function bootstrap(dbService) {
 
   console.log(`[BOOTSTRAP] Mode: ${mode} — running initialization scripts...`);
 
-  // If mode is "seed", skip DDL scripts (tables already exist)
+  // If mode is "seed", still run ALTER (to add missing columns) but skip DDL creates
   const scriptsToRun = mode === "seed"
-    ? SQL_SCRIPTS.filter(s => !s.file.includes("ddl"))
+    ? SQL_SCRIPTS.filter(s => !s.ddl || s.file.includes("alter"))
     : SQL_SCRIPTS;
 
   // Get a dedicated client so SET statement_timeout persists across queries
