@@ -105,9 +105,9 @@ async function getSchemaContext() {
   return schemaCache;
 }
 
-async function executeQuery(sqlText) {
+async function executeQuery(sqlText, params) {
   const p = getPool();
-  const result = await p.query(sqlText);
+  const result = params ? await p.query(sqlText, params) : await p.query(sqlText);
 
   const rows = result.rows || [];
   const fields = (result.fields || []).map((f) => ({
