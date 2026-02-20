@@ -120,17 +120,20 @@ const PIE_CONFIGS: Record<Topic, { fields: { key: string; label: string }[] }> =
 };
 
 // ── Helpers ───────────────────────────────────────────
-function fmtNum(v: number | null | undefined): string {
+function fmtNum(v: number | string | null | undefined): string {
   if (v == null) return "-";
-  return v.toLocaleString("en-AU");
+  const n = Number(v);
+  return isNaN(n) ? "-" : n.toLocaleString("en-AU");
 }
-function fmtCurrency(v: number | null | undefined): string {
+function fmtCurrency(v: number | string | null | undefined): string {
   if (v == null) return "-";
-  return "$" + v.toLocaleString("en-AU");
+  const n = Number(v);
+  return isNaN(n) ? "-" : "$" + n.toLocaleString("en-AU");
 }
-function fmtPct(v: number | null | undefined): string {
+function fmtPct(v: number | string | null | undefined): string {
   if (v == null) return "-";
-  return v.toFixed(1) + "%";
+  const n = Number(v);
+  return isNaN(n) ? "-" : n.toFixed(1) + "%";
 }
 function truncLabel(s: string, max = 18): string {
   return s.length > max ? s.slice(0, max) + "..." : s;
@@ -313,7 +316,7 @@ export default function BoroondraABS() {
     if (!kpis) return [];
     return [
       { icon: "People", color: "#7C7CFF", label: "Total Population", value: fmtNum(kpis.total_population), sub: `${kpis.census_year} Census` },
-      { icon: "Calendar", color: "#38BDF8", label: "Avg Median Age", value: kpis.avg_median_age?.toFixed(1) || "-", sub: "years" },
+      { icon: "Calendar", color: "#38BDF8", label: "Avg Median Age", value: kpis.avg_median_age != null ? Number(kpis.avg_median_age).toFixed(1) : "-", sub: "years" },
       { icon: "Money", color: "#34D399", label: "Avg HH Income", value: fmtCurrency(kpis.avg_median_household_income), sub: "per week" },
       { icon: "Home", color: "#FBBF24", label: "Total Dwellings", value: fmtNum(kpis.total_dwellings), sub: "across all SA2s" },
       { icon: "Education", color: "#F472B6", label: "Bachelor+", value: fmtPct(kpis.pct_bachelor_or_higher), sub: "of adult population" },
@@ -490,7 +493,7 @@ export default function BoroondraABS() {
                   <tr key={i} style={{ background: i % 2 === 0 ? "#FAFAFA" : "#fff" }}>
                     {tableColumns.map(col => (
                       <td key={col} className={styles.td}>
-                        {typeof row[col] === "number" ? fmtNum(row[col]) : String(row[col] ?? "-")}
+                        {row[col] != null && !isNaN(Number(row[col])) && row[col] !== "" ? fmtNum(row[col]) : String(row[col] ?? "-")}
                       </td>
                     ))}
                   </tr>
