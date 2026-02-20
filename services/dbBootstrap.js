@@ -56,6 +56,17 @@ async function needsBootstrap(dbService) {
       return "spatial";
     }
 
+    // Check if ABS Census tables exist (added after initial deployment)
+    try {
+      const absResult = await dbService.executeQuery(`
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'abs_sa2_areas'
+      `);
+      if (absResult.rows.length === 0) return "abs";
+    } catch {
+      return "abs";
+    }
+
     return false; // Everything looks good
   } catch {
     return "full"; // if we can't even query, we need full bootstrap
@@ -137,6 +148,11 @@ async function bootstrap(dbService) {
     // Only run spatial DDL + spatial seed
     scriptsToRun = SQL_SCRIPTS.filter(s =>
       s.file.includes("spatial") || s.file.includes("alter")
+    );
+  } else if (mode === "abs") {
+    // Only run ABS DDL + ABS seed
+    scriptsToRun = SQL_SCRIPTS.filter(s =>
+      s.file.includes("abs") || s.file.includes("alter")
     );
   } else if (mode === "seed") {
     // Run ALTER (add missing columns) + seed scripts, skip DDL creates
@@ -292,7 +308,45 @@ async function resetAndReseed(dbService) {
       results.push({ step: "truncate", status: "ok-partial" });
     }
 
-    // Now run all seed scripts (council + seed + spatial)
+    // First run DDL scripts to ensure all tables exist (CREATE IF NOT EXISTS is safe)
+    const ddlScripts = SQL_SCRIPTS.filter(s => s.ddl);
+    for (const script of ddlScripts) {
+      const filePath = path.join(SQL_DIR, script.file);
+      try {
+        const sql = await fs.readFile(filePath, "utf-8");
+        if (!sql.trim()) continue;
+
+        const stmts = splitStatements(sql);
+        console.log(`[BOOTSTRAP] Running DDL ${script.file} (${stmts.length} statements)...`);
+        const startTime = Date.now();
+
+        let stmtIndex = 0;
+        for (const stmt of stmts) {
+          stmtIndex++;
+          try {
+            await client.query(stmt);
+          } catch (stmtErr) {
+            const preview = stmt.substring(0, 120).replace(/\n/g, " ");
+            console.error(`[BOOTSTRAP]    DDL stmt ${stmtIndex}/${stmts.length} failed: ${stmtErr.message}`);
+            console.error(`[BOOTSTRAP]    SQL: ${preview}...`);
+            if (script.fatal) throw stmtErr;
+            // Non-fatal DDL — continue (e.g. PostGIS not available)
+          }
+        }
+
+        const elapsed = Date.now() - startTime;
+        console.log(`[BOOTSTRAP] ✅ DDL ${script.file} completed in ${elapsed}ms`);
+        results.push({ file: script.file, status: "ok", elapsed });
+      } catch (err) {
+        console.error(`[BOOTSTRAP] ❌ DDL ${script.file} failed:`, err.message);
+        results.push({ file: script.file, status: "error", error: err.message });
+        if (script.fatal) {
+          return { reset: true, success: false, message: `DDL ${script.file} failed`, results };
+        }
+      }
+    }
+
+    // Now run all seed scripts (council + seed + spatial + ABS)
     const seedScripts = SQL_SCRIPTS.filter(s => !s.ddl);
     for (const script of seedScripts) {
       const filePath = path.join(SQL_DIR, script.file);
